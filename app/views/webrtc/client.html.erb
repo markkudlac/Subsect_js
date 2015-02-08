@@ -1,0 +1,94 @@
+	<div id="tit">
+		<h1>Subsect Client</h1>
+	
+	<p>
+		<input id="peerid" type="text" value="fred" /> <br/>
+		<input id="clibut" type="button" style="margin-top: 20px" value="Start Client" />
+	</p>
+	
+	</div>
+	
+	<script>
+	var peer = null
+	var conn = null;
+
+	
+	$(document).ready(function(){
+//		console.log("Server document ready")
+	
+		initall();
+	})
+	
+	
+	function initall(){
+		
+	$('#clibut').on("click",function(){
+		console.log("clibut: pressed")
+		
+		if ($("#clibut").val().indexOf("St") == 0){
+			peerClientOn();
+			
+		} else {
+			conn.close();
+			conn = null;
+			peer.destroy();
+			peer = null;
+//			$("#clibut").val("Start Client")
+			$("#clibut").remove()
+		}
+	});
+
+	}
+	
+	function peerClientOn(){
+		peer = new Peer( {key: 'wcf528rijzx8byb9', debug: 3});
+	
+			peer.on('open', function(id) {
+			  console.log('My peer ID is: ' + id);
+				conn = peer.connect($('#peerid').val());
+				$("#clibut").val("Close Client")
+				callserver()
+			});
+	}
+	
+	
+	function callserver() {
+		
+		conn.on('open', function() {
+		  // Receive messages
+		  conn.on('data', function(data) {
+		    console.log('Received', data);
+				if (data.datatype.indexOf('html') == 0){
+					$('#tit').append(data.data)
+					conn.send('css');
+					conn.send('js');
+				} else if (data.datatype.indexOf('js') == 0){
+					addjs(data.data)
+				}  else if (data.datatype.indexOf('css') == 0){
+					addcss(data.data)
+				}
+		  });
+
+		  // Send messages
+
+		  conn.send('html');
+	//		console.log("after send")
+			});
+	}	
+	
+	
+function addjs(js){
+	$('head').append('\<script\>'+js+'\</script\>')
+}
+
+
+function addcss(css){
+	$('head').append('\<style\>'+css+'\</style\>')
+}
+
+/*	
+	$('head').append('\<style\>p {color:red;}\</style\>')
+	$('#tit').append('\<p\>Swallow this\</p\>')
+*/
+
+	</script>
