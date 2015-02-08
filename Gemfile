@@ -44,3 +44,4 @@ group :development, :test do
   gem 'heroku'
 end
 
+ruby "2.2.0"
