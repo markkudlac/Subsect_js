@@ -1,9 +1,9 @@
 class WebrtcController < ApplicationController
-
-  def server
-  end
   
   def client
+  end
+  
+  def server
   end
 end
   

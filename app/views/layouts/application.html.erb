@@ -6,7 +6,12 @@
   <%= javascript_include_tag 'application', 'data-turbolinks-track' => true %>
 	
 	<%= javascript_include_tag "http://cdn.peerjs.com/0.3/peer.min.js" %>
-	
+
+
+	<% if current_page?(controller: 'webrtc', action: 'client') then %>
+		<%= javascript_include_tag 'subsect', 'data-turbolinks-track' => true %>
+	<% end %>
+
   <%= csrf_meta_tags %>
 </head>
 <body>
