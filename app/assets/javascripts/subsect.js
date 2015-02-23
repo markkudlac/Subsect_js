@@ -290,7 +290,7 @@ console.log("Host : " + location.host)
 		  });
 
 		  // Send messages
-		  conn.send('SysHtml/TestApp/index.html');
+		  conn.send('SysHtml/TestApp/testapp.html');
 			});
 	}	
 	
