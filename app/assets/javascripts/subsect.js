@@ -21,7 +21,6 @@
 	
   $.htmlDoc = function(html) {
 		
-		console.log("CALLED htmlDoc")
     // A collection of "intended" elements that can't be rendered cross-browser
     // with .innerHTML, for which placeholders must be swapped.
     var elems = $();
@@ -40,6 +39,7 @@
         // over to the temporary object.
         if ( attrs ) {
           $.each($('<div' + attrs + '/>')[0].attributes, function(i, attr) {
+						
             obj[attr.name] = attr.value;
           });
         }
@@ -78,12 +78,44 @@
 }(jQuery));
 
 
+
+// Copy all atributes over for elements
+(function($) {
+    // Attrs
+    $.fn.attrs = function(attrs) {
+        var t = $(this);
+        if (attrs) {
+            // Set attributes
+            t.each(function(i, e) {
+                var j = $(e);
+                for (var attr in attrs) {
+                    j.attr(attr, attrs[attr]);
+                };
+            });
+            return t;
+        } else {
+            // Get attributes
+            var a = {},
+                r = t.get(0);
+            if (r) {
+                r = r.attributes;
+                for (var i in r) {
+                    var p = r[i];
+                    if (typeof p.nodeValue !== 'undefined') a[p.nodeName] = p.nodeValue;
+                }
+            }
+            return a;
+        }
+    };
+})(jQuery);
+
+
 // This is just here for various test
 function testall(){
 	
 //	var xstr = '<html><head> <script>alert("HD")<\/script> <script src="zzz"><\/script> </head><body id="xbdy" class="xcl"><div id="out"><div id="div1">Hello world</div><div id="div2">Hi there</div></div></body></html>'
 
-var xstr = '<html><head> '+
+var xstr = '<html ng-app><head> '+
         '<meta charset="UTF-8"></meta><title>Subsect Android</title> '+
         '<script src="/localjs/client.js"><\/script> ' +
         '<link rel="stylesheet" type="text/css" href="/localcss/client.css"> ' +
@@ -105,9 +137,10 @@ var xstr = '<html><head> '+
 							    };
 							reader.readAsText(xblob)
 		*/
-					
-$.data(xhd.find("h1").get(0), "subsect_h1", "data added here")
-	alert("h1 : " + $.data(xhd.find("h1").get(0), "subsect_h1"))
+				
+//	$("html").attrs(xhd.filter("html").attrs()	)
+//$.data(xhd.find("h1").get(0), "subsect_h1", "data added here")
+//	alert("h1 : " + $.data(xhd.find("h1").get(0), "subsect_h1"))
 	//alert("h1 : " + $(xqobj[0]).html())
 	//						xhd.find('head').children().get(1).removeAttribute("src")
 	//alert("Script : " + xhd.find('head').children().get(1).getAttribute("src"))
@@ -164,7 +197,7 @@ console.log("Host : " + location.host)
 		conn.on('open', function() {
 		  // Receive messages
 		  conn.on('data', function(data) {
-		    console.log('Received : ' + data);
+//		    console.log('Received : ' + data);
 				
 				var xblob = new Blob([ new Uint8Array(data.blob) ], {type : data.blobtype});
 				
@@ -183,13 +216,18 @@ console.log("Host : " + location.host)
 							 clearimgsrc(rcvhtml);
 							 
 							 var headtags = rcvhtml.find('head').children('script').get();
-							 console.log("Number of script head tags : "+ headtags.length)
+// Transfer attributes							 
+							 $("body").attrs(rcvhtml.find('body').attrs());
+							 $("head").attrs(rcvhtml.find('head').attrs());
+							 $("html").attrs(rcvhtml.filter('html').attrs());
+							 
+//							 console.log("Number of script head tags : "+ headtags.length)
 							 $.each(headtags, function(){
-								 console.log("script head tags src : "+ this.src)
+//								 console.log("script head tags src : "+ this.src)
 								 
 								 if (islocalfile(this.src)){
 									 filecnt++;
-									 console.log("extract head tags src : "+ extractpath(this.src))
+//									 console.log("extract head tags src : "+ extractpath(this.src))
 									 conn.send('SysHtml/TestApp' + extractpath(this.src));
 								 }
 							 })
@@ -260,9 +298,8 @@ console.log("Host : " + location.host)
 	function clearimgsrc(rcvhtml) {
 
 		 $.each(rcvhtml.find('img').get(), function(){
-			 console.log("clear img src : " + this.src)
+//			 console.log("clear img src : " + this.src)
 			 if (islocalfile(this.src)){
-				 			 console.log("extracted path : " + extractpath(this.src))
 			 	$.data(this, "subsect_src", extractpath(this.src))
 			 	this.removeAttribute("src")
 			 }
@@ -273,11 +310,10 @@ console.log("Host : " + location.host)
 	function fetchimgsrc(){
 		
 	 $.each($('img').get(), function(){
-		  console.log("fetchimg  : " + this.src + "  data : "+ $.data(this, "subsect_src"))
+//		  console.log("fetchimg  : " + this.src + "  data : "+ $.data(this, "subsect_src"))
 		 if (! this.hasAttribute("src") ) {
 			 var xdata = $.data(this, "subsect_src");
 			 
-		 		console.log("img src data : " + xdata)
 			 if (xdata !== undefined) conn.send('SysHtml/TestApp' + xdata);
 		 }
 	 })
@@ -296,9 +332,7 @@ console.log("Host : " + location.host)
 	function islocalfile(pathstr){
 		
 		if (pathstr.indexOf("file:") == 0) return true
-		console.log("islocalfile indexof : " + pathstr.indexOf(location.host))
 		return(location.host.length > 0 && pathstr.indexOf(location.host) >= 0)
-	
 	}
 	
 	
