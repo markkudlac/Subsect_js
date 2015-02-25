@@ -6,7 +6,9 @@ Rails.application.routes.draw do
   
   # You can have the root of your site routed with "root"
   
-  get '/server', to: 'webrtc#server'
+  get 'server', to: 'webrtc#server'
+  get 'app/:appname', to: 'webrtc#client'
+  get 'app/', to: 'webrtc#client'
   root 'webrtc#client'
   
 

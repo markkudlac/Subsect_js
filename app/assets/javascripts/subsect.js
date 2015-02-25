@@ -154,11 +154,17 @@ var xstr = '<html ng-app><head> '+
 
 var peer = null
 var conn = null;
+var appPath = null;
+var appFile = null;
 
 console.log("Protocol : " + location.protocol)
 console.log("Host : " + location.host)
 
-	function initall(){
+	function initall(apath, aname){
+		
+	appPath = apath
+	appName = aname
+	APPURL = "/app"
 		
 	$('#clibut').on("click",function(){
 		console.log("clibut: pressed")
@@ -228,7 +234,7 @@ console.log("Host : " + location.host)
 								 if (islocalfile(this.src)){
 									 filecnt++;
 //									 console.log("extract head tags src : "+ extractpath(this.src))
-									 conn.send('SysHtml/TestApp' + extractpath(this.src));
+									 conn.send(appPath + extractpath(this.src));
 								 }
 							 })
 							 
@@ -236,14 +242,15 @@ console.log("Host : " + location.host)
 							 $.each(headtags, function(){
 								 if (islocalfile(this.href)){
 									 filecnt++;
-									 conn.send('SysHtml/TestApp' + extractpath(this.href));
+									 conn.send(appPath + extractpath(this.href));
 								 }
 							 })
 							 
 							 loadhead(filecnt, rcvhtml);
 							}	else if (xblob.type.indexOf("javascript") > 0) {
 								
-								var rmsrc = data.uri.substr(data.uri.indexOf('TestApp')+7)
+			//					var rmsrc = data.uri.substr(data.uri.indexOf(appName)+appName.length+4)
+								var rmsrc = cleanURI(data.uri)
 								var scrpt = rcvhtml.find('head').children('script[src$="'+rmsrc+'"]')
 								scrpt.removeAttr("src")
 								scrpt.html(reader.result)
@@ -251,7 +258,7 @@ console.log("Host : " + location.host)
 								filecnt--;
 								loadhead(filecnt, rcvhtml);
 							} else if (xblob.type.indexOf("css") > 0) {
-								var rmsrc = data.uri.substr(data.uri.indexOf('TestApp')+7)
+								var rmsrc = cleanURI(data.uri)
 								var linkcss = rcvhtml.find('head').children('link[href$="'+rmsrc+'"]')
 								
 				        var locurl = window.URL || window.webkitURL;
@@ -274,14 +281,13 @@ console.log("Host : " + location.host)
 		        var url = window.URL || window.webkitURL;
 		        var imgurl = url.createObjectURL(xblob);
 						
-						var rmsrc = data.uri.substr(data.uri.indexOf('TestApp')+7)
-						
 					 $.each($('img').get(), function(){
 						 datatag = $.data(this, "subsect_src")
 						 
 						 if (datatag !== undefined) {
-//						 	console.log("img data : " + datatag)
-						 	if (datatag == rmsrc){
+						 	console.log("img data : " + datatag + " uri : " + data.uri)
+//							if (datatag == data.uri){
+							if (endsWith(data.uri,datatag)){
 						 		this.src=imgurl
 						 	}
 						}
@@ -290,9 +296,21 @@ console.log("Host : " + location.host)
 		  });
 
 		  // Send messages
-		  conn.send('SysHtml/TestApp/testapp.html');
+		  conn.send(appPath + appName.toLowerCase() + ".html");
+//			conn.send('subsect.html');
 			});
 	}	
+	
+	
+	function cleanURI(datauri) {
+		
+		return datauri.substr(datauri.indexOf(appName)+appName.length + APPURL.length)
+	}
+	
+	
+	function endsWith(str, suffix) {
+	    return str.indexOf(suffix, str.length - suffix.length) !== -1;
+	}
 	
 	
 	function clearimgsrc(rcvhtml) {
@@ -310,11 +328,11 @@ console.log("Host : " + location.host)
 	function fetchimgsrc(){
 		
 	 $.each($('img').get(), function(){
-//		  console.log("fetchimg  : " + this.src + "  data : "+ $.data(this, "subsect_src"))
+		  console.log("fetchimg  : " + this.src + "  data : "+ $.data(this, "subsect_src"))
 		 if (! this.hasAttribute("src") ) {
 			 var xdata = $.data(this, "subsect_src");
 			 
-			 if (xdata !== undefined) conn.send('SysHtml/TestApp' + xdata);
+			 if (xdata !== undefined) conn.send(appPath + xdata);
 		 }
 	 })
 	}
@@ -325,7 +343,7 @@ console.log("Host : " + location.host)
 		if (imgsrc != null){
 			$.data(jqry[0],"subsect_src", imgsrc)
 		}
-		conn.send('SysHtml/TestApp'+imgsrc)
+		conn.send(appPath + imgsrc)
 	}
 	
 	
@@ -342,8 +360,13 @@ console.log("Host : " + location.host)
 		
 		var hostoff = pathstr.indexOf(location.host);
 		if ( location.host.length > 0 && hostoff >= 0) {
-			return  pathstr.substr(hostoff + location.host.length);
+			
+			var xpath = pathstr.substr(hostoff + location.host.length+4)
+			if (xpath.indexOf('/') == 0) xpath = xpath.substr(1)
+				console.log("raw ex 1 : " + pathstr + " path : " + xpath)
+			return  xpath;
 		} else {
+			console.log("raw ex 2 : " + pathstr + " path : " + xpath)
 			return pathstr;
 		}
 	}
@@ -358,4 +381,17 @@ console.log("Host : " + location.host)
 			fetchimgsrc();
 		}
 	}
+	
+
+function tagWithHref(ev) {
+
+	var xhref = $(this).attr("href")
+	
+	alert("anchor : " + xhref)
+	if (xhref.indexOf("http:") < 0){
+		ev.preventDefault();
+		conn.send(xhref)
+	}
+    
+}
 	

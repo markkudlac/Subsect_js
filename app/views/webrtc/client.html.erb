@@ -6,9 +6,6 @@
 	</p>
 	</div>
 	
-	<script>
-	$(document).ready(function(){
-		initall();
-//			testall()			
-	})
-	</script>
+<%= javascript_tag(render :template => "layouts/client", :formats => [:js],
+	:locals => {:appPath => @appPath, :appName => @appName})
+	%>
