@@ -169,7 +169,7 @@ console.log("Host : " + location.host)
 	$('#clibut').on("click",function(){
 		console.log("clibut: pressed")
 		
-		if ($("#clibut").val().indexOf("St") == 0){
+		if ($("#clibut").text().indexOf("St") == 0){
 			peerClientOn();
 			
 		} else {
@@ -189,7 +189,7 @@ console.log("Host : " + location.host)
 			peer.on('open', function(id) {
 			  console.log('My peer ID is: ' + id);
 				conn = peer.connect($('#peerid').val());
-				$("#clibut").val("Close Client")
+				$("#clibut").text("Close Client")
 				callserver()
 			});
 	}
@@ -388,7 +388,7 @@ function tagWithHref(ev) {
 	var xhref = $(this).attr("href")
 	
 //	alert("anchor : " + xhref)
-	if (xhref.indexOf("http:") < 0){
+	if (xhref.indexOf("http") < 0){
 		ev.preventDefault();
 		conn.send(xhref)
 	}
