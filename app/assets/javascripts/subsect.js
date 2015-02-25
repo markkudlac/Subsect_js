@@ -203,7 +203,6 @@ console.log("Host : " + location.host)
 		conn.on('open', function() {
 		  // Receive messages
 		  conn.on('data', function(data) {
-//		    console.log('Received : ' + data);
 				
 				var xblob = new Blob([ new Uint8Array(data.blob) ], {type : data.blobtype});
 				
@@ -230,8 +229,9 @@ console.log("Host : " + location.host)
 //							 console.log("Number of script head tags : "+ headtags.length)
 							 $.each(headtags, function(){
 //								 console.log("script head tags src : "+ this.src)
-								 
-								 if (islocalfile(this.src)){
+								 if (blockInclude(this.src)) {
+								 	this.parentNode.removeChild(this);
+								 } else if (islocalfile(this.src)){
 									 filecnt++;
 //									 console.log("extract head tags src : "+ extractpath(this.src))
 									 conn.send(appPath + extractpath(this.src));
@@ -254,7 +254,6 @@ console.log("Host : " + location.host)
 								var scrpt = rcvhtml.find('head').children('script[src$="'+rmsrc+'"]')
 								scrpt.removeAttr("src")
 								scrpt.html(reader.result)
-//								alert("Injected javascript : "+ rcvhtml.find('head').html())
 								filecnt--;
 								loadhead(filecnt, rcvhtml);
 							} else if (xblob.type.indexOf("css") > 0) {
@@ -265,16 +264,14 @@ console.log("Host : " + location.host)
 				        var hrefurl= locurl.createObjectURL(xblob);
 								
 								linkcss.attr("href", hrefurl)
-//								alert("set css href : "+ rcvhtml.find('head').html())
 								filecnt--;
 								loadhead(filecnt, rcvhtml);
 							}
-
 				    };
 						
 	//					console.log("data : "+ data.data)
+						reader.readAsText(xblob)
 						
-								reader.readAsText(xblob)
 					} else if (xblob.type.indexOf("image") == 0) {
 	// HTML will be inserted before any image manipulation
 						var datatag
@@ -285,8 +282,8 @@ console.log("Host : " + location.host)
 						 datatag = $.data(this, "subsect_src")
 						 
 						 if (datatag !== undefined) {
-						 	console.log("img data : " + datatag + " uri : " + data.uri)
-//							if (datatag == data.uri){
+//						 	console.log("img data : " + datatag + " uri : " + data.uri)
+
 							if (endsWith(data.uri,datatag)){
 						 		this.src=imgurl
 						 	}
@@ -297,9 +294,13 @@ console.log("Host : " + location.host)
 
 		  // Send messages
 		  conn.send(appPath + appName.toLowerCase() + ".html");
-//			conn.send('subsect.html');
 			});
 	}	
+	
+	function blockInclude(str){
+		
+		return (str.indexOf("jquery-") >= 0 || str.indexOf("dev_subsect.js") >= 0 );
+	}
 	
 	
 	function cleanURI(datauri) {
@@ -328,7 +329,7 @@ console.log("Host : " + location.host)
 	function fetchimgsrc(){
 		
 	 $.each($('img').get(), function(){
-		  console.log("fetchimg  : " + this.src + "  data : "+ $.data(this, "subsect_src"))
+//		  console.log("fetchimg  : " + this.src + "  data : "+ $.data(this, "subsect_src"))
 		 if (! this.hasAttribute("src") ) {
 			 var xdata = $.data(this, "subsect_src");
 			 
@@ -338,10 +339,10 @@ console.log("Host : " + location.host)
 	}
 	
 	
-	function processimg(jqry,imgsrc){
+	function processimg(el, imgsrc){
 		
 		if (imgsrc != null){
-			$.data(jqry[0],"subsect_src", imgsrc)
+			$.data(el, "subsect_src", imgsrc)
 		}
 		conn.send(appPath + imgsrc)
 	}
@@ -363,10 +364,9 @@ console.log("Host : " + location.host)
 			
 			var xpath = pathstr.substr(hostoff + location.host.length+4)
 			if (xpath.indexOf('/') == 0) xpath = xpath.substr(1)
-				console.log("raw ex 1 : " + pathstr + " path : " + xpath)
+//				console.log("raw ex 1 : " + pathstr + " path : " + xpath)
 			return  xpath;
 		} else {
-			console.log("raw ex 2 : " + pathstr + " path : " + xpath)
 			return pathstr;
 		}
 	}
@@ -387,7 +387,7 @@ function tagWithHref(ev) {
 
 	var xhref = $(this).attr("href")
 	
-	alert("anchor : " + xhref)
+//	alert("anchor : " + xhref)
 	if (xhref.indexOf("http:") < 0){
 		ev.preventDefault();
 		conn.send(xhref)
