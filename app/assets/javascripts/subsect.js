@@ -157,14 +157,11 @@ var conn = null;
 var appPath = null;
 var appFile = null;
 
-console.log("Protocol : " + location.protocol)
-console.log("Host : " + location.host)
-
 	function initall(apath, aname){
 		
-	appPath = apath
-	appName = aname
-	APPURL = "/app"
+		appPath = apath;
+		appName = aname;
+		APPURL = "/app";
 		
 	$('#clibut').on("click",function(){
 		console.log("clibut: pressed")
@@ -206,7 +203,24 @@ console.log("Host : " + location.host)
 				
 				var xblob = new Blob([ new Uint8Array(data.blob) ], {type : data.blobtype});
 				
-				if (xblob.type.indexOf("text") == 0 || xblob.type.indexOf("javascript") > 0){
+				console.log("all uri : " + data.uri);
+				if (data.uri.indexOf('api/') >= 0 ){
+					
+					console.log("api blob type : " + xblob.type);
+					var reader = new FileReader();
+					reader.onload = function(){
+						
+						var xread = JSON.parse(reader.result)
+	
+						alert("In api result : " + reader.result)
+	//					var xar = new Array(xread);
+//						alert("In api first item : " + xread[0].tag)
+					}
+					
+					reader.readAsText(xblob);
+					
+				} else if (xblob.type.indexOf("text") == 0 || 
+									xblob.type.indexOf("javascript") > 0){
 					var reader = new FileReader();
 					reader.onload = function(){
 //				      alert("Blob : " + reader.result);
@@ -296,6 +310,7 @@ console.log("Host : " + location.host)
 		  conn.send(appPath + appName.toLowerCase() + ".html");
 			});
 	}	
+	
 	
 	function blockInclude(str){
 		
@@ -394,4 +409,57 @@ function tagWithHref(ev) {
 	}
     
 }
+
 	
+function insertDB(table, values) {
+	
+	if (values == null || Object.keys(values).length == 0) {
+		alert("Error: Insert values is empty")
+		return;
+	}
+	
+	var sqlpk = {table: table, values: values}
+	
+	conn.send('api/insertDB?sqlpk='+ encodeURIComponent(JSON.stringify(sqlpk)))
+}
+
+
+function queryDB(qstr, args, limits) {
+	
+	if (args == null) args = {};
+	if (limits == null) limits = {};
+	
+	var sqlpk = {qstr: qstr, args: args, limits: limits}
+	
+	conn.send('api/queryDB?sqlpk='+ encodeURIComponent(JSON.stringify(sqlpk)))
+}
+
+
+function updateDB(table, values, qstr, args) {
+	
+	if (values == null || Object.keys(values).length == 0) {
+		alert("Error: Update values is empty")
+		return;
+	}
+	
+	if (qstr == null) { qstr = "";}
+	
+	var sqlpk = {table: table, values: values, qstr: qstr, args: args}
+	
+	conn.send('api/updateDB?sqlpk='+ encodeURIComponent(JSON.stringify(sqlpk)))
+}
+
+
+function removeDB(table, qstr, args) {
+	
+	if (args == null || Object.keys(args).length == 0) {
+		alert("Error: removeDB args is empty")
+		return;
+	}
+	
+	if (qstr == null) { qstr = ""	}
+	
+	var sqlpk = {table: table, qstr: qstr, args: args}
+	
+	conn.send('api/removeDB?sqlpk='+ encodeURIComponent(JSON.stringify(sqlpk)))
+}
