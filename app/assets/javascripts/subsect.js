@@ -101,7 +101,8 @@
                 r = r.attributes;
                 for (var i in r) {
                     var p = r[i];
-                    if (typeof p.nodeValue !== 'undefined') a[p.nodeName] = p.nodeValue;
+ //                   if (typeof p.nodeValue !== 'undefined') a[p.nodeName] = p.nodeValue;
+										if (typeof p.value !== 'undefined') a[p.nodeName] = p.value;
                 }
             }
             return a;
@@ -156,15 +157,19 @@ var peer = null
 var conn = null;
 var appPath = null;
 var appFile = null;
+var rcvbuffer = {};
+
 
 	function initall(apath, aname){
 		
 		appPath = apath;
 		appName = aname;
 		APPURL = "/app";
+		LOCALSRC = "localsrc"
+		
+//			console.log("appPath : " + appPath)
 		
 	$('#clibut').on("click",function(){
-		console.log("clibut: pressed")
 		
 		if ($("#clibut").text().indexOf("St") == 0){
 			peerClientOn();
@@ -180,12 +185,19 @@ var appFile = null;
 
 	}
 	
+	
+	function fullPath(locpath){
+		
+		return(appPath + locpath);
+	}
+	
+	
 	function peerClientOn(){
 		peer = new Peer( {key: 'wcf528rijzx8byb9', debug: 3});
 	
 			peer.on('open', function(id) {
 			  console.log('My peer ID is: ' + id);
-				conn = peer.connect($('#peerid').val());
+				conn = peer.connect($('#peerid').val(), {reliable: true});
 				$("#clibut").text("Close Client")
 				callserver()
 			});
@@ -201,9 +213,34 @@ var appFile = null;
 		  // Receive messages
 		  conn.on('data', function(data) {
 				
-				var xblob = new Blob([ new Uint8Array(data.blob) ], {type : data.blobtype});
+				var xblob;
+
+console.log("In data in : " + data.cnt + "  uri : " + data.uri);
+				if (data.cnt == 0){
+					xblob = new Blob([ new Uint8Array(data.blob) ], {type : data.blobtype});
+				} else {
+					if (data.cnt == 1) {
+						rcvbuffer[data.uri] = {type: data.blobtype, block: []};
+					}
+					rcvbuffer[data.uri].block[data.cnt -  1] = new Uint8Array(data.blob);
+					
+					if (data.cnt == -1) {
+						console.log("Returning from data loop");
+						xblob = new Blob(rcvbuffer[data.uri].block, {type : data.blobtype});
+					} else {
+						console.log("In data loop : " + data.cnt + "  blobsize : " +
+								rcvbuffer[data.uri].block[0].length);
+								
+						conn.send(xhrCall(data.uri, data.cnt));
+						
+						if (data.blobtype.indexOf("audio") == 0) {
+							driveStream()
+						}
+						return
+					}
+				}
 				
-				console.log("all uri : " + data.uri);
+//				console.log("all uri : " + data.uri);
 				if (data.uri.indexOf('api/') >= 0 ){
 					
 					console.log("api blob type : " + xblob.type);
@@ -213,8 +250,6 @@ var appFile = null;
 						var xread = JSON.parse(reader.result)
 	
 						alert("In api result : " + reader.result)
-	//					var xar = new Array(xread);
-//						alert("In api first item : " + xread[0].tag)
 					}
 					
 					reader.readAsText(xblob);
@@ -248,7 +283,7 @@ var appFile = null;
 								 } else if (islocalfile(this.src)){
 									 filecnt++;
 //									 console.log("extract head tags src : "+ extractpath(this.src))
-									 conn.send(appPath + extractpath(this.src));
+									 conn.send(xhrCall(fullPath(extractpath(this.src))));
 								 }
 							 })
 							 
@@ -256,7 +291,7 @@ var appFile = null;
 							 $.each(headtags, function(){
 								 if (islocalfile(this.href)){
 									 filecnt++;
-									 conn.send(appPath + extractpath(this.href));
+									 conn.send(xhrCall(fullPath(extractpath(this.href))));
 								 }
 							 })
 							 
@@ -293,21 +328,27 @@ var appFile = null;
 		        var imgurl = url.createObjectURL(xblob);
 						
 					 $.each($('img').get(), function(){
-						 datatag = $.data(this, "subsect_src")
+						 datatag = $.data(this, LOCALSRC)
 						 
 						 if (datatag !== undefined) {
-//						 	console.log("img data : " + datatag + " uri : " + data.uri)
+						 	console.log("img data : " + datatag + " uri : " + data.uri)
 
-							if (endsWith(data.uri,datatag)){
+							if (data.uri.indexOf(datatag) == 0){
 						 		this.src=imgurl
 						 	}
 						}
-					 })
+					})
+						
+				} else if (xblob.type.indexOf("audio") == 0) {
+						//Audio
+					console.log("Audio blob size : " + xblob.size + "  Type : "+xblob.type);
+					
+					endStream(data.uri);
 					}
 		  });
 
 		  // Send messages
-		  conn.send(appPath + appName.toLowerCase() + ".html");
+		  conn.send(xhrCall(fullPath(appName.toLowerCase()) + ".html"));
 			});
 	}	
 	
@@ -324,17 +365,27 @@ var appFile = null;
 	}
 	
 	
+	/*
 	function endsWith(str, suffix) {
 	    return str.indexOf(suffix, str.length - suffix.length) !== -1;
 	}
-	
+	*/
 	
 	function clearimgsrc(rcvhtml) {
 
 		 $.each(rcvhtml.find('img').get(), function(){
 //			 console.log("clear img src : " + this.src)
 			 if (islocalfile(this.src)){
-			 	$.data(this, "subsect_src", extractpath(this.src))
+			 	$.data(this, LOCALSRC, fullPath(extractpath(this.src)))
+			 	this.removeAttribute("src")
+			 }
+		 })
+		 
+		 //Audio
+		 $.each(rcvhtml.find('source').get(), function(){
+			 console.log("clear source src : " + this.src)
+			 if (islocalfile(this.src)){
+			 	$.data(this, LOCALSRC, fullPath(extractpath(this.src)))
 			 	this.removeAttribute("src")
 			 }
 		 })
@@ -344,11 +395,20 @@ var appFile = null;
 	function fetchimgsrc(){
 		
 	 $.each($('img').get(), function(){
-//		  console.log("fetchimg  : " + this.src + "  data : "+ $.data(this, "subsect_src"))
+//		  console.log("fetchimg  : " + this.src + "  data : "+ $.data(this, LOCALSRC))
 		 if (! this.hasAttribute("src") ) {
-			 var xdata = $.data(this, "subsect_src");
+			 var xdata = $.data(this, LOCALSRC);
 			 
-			 if (xdata !== undefined) conn.send(appPath + xdata);
+			 if (xdata !== undefined) conn.send(xhrCall(xdata));
+		 }
+	 })
+	 
+	 $.each($('source').get(), function(){
+		  console.log("fetchimg  source tag: " + this.src + "  data : "+ $.data(this, LOCALSRC))
+		 if (! this.hasAttribute("src") ) {
+			 var xdata = $.data(this, LOCALSRC);
+			 
+			 if (xdata !== undefined) conn.send(xhrCall(xdata));
 		 }
 	 })
 	}
@@ -357,9 +417,18 @@ var appFile = null;
 	function processimg(el, imgsrc){
 		
 		if (imgsrc != null){
-			$.data(el, "subsect_src", imgsrc)
+			$.data(el, LOCALSRC, fullPath(imgsrc))
 		}
-		conn.send(appPath + imgsrc)
+		conn.send(xhrCall(fullPath(imgsrc)))
+	}
+	
+	
+	function xhrCall(file, cnt, type){
+		
+		if (cnt === undefined || cnt === null) {cnt = 0 }
+		if (type === undefined || type === null) {type = "GET" }
+		
+		return({type: type, file: file, cnt: cnt});
 	}
 	
 	
@@ -402,14 +471,94 @@ function tagWithHref(ev) {
 
 	var xhref = $(this).attr("href")
 	
-//	alert("anchor : " + xhref)
 	if (xhref.indexOf("http") < 0){
 		ev.preventDefault();
-		conn.send(xhref)
+		conn.send(xhrCall(xhref))
 	}
-    
 }
 
+
+function driveStream() {
+	
+ $.each($('source').get(), function(){
+//	  console.log("DriveStream tag: " + this.src + "  data : "+ $.data(this, LOCALSRC))
+	 if (! this.hasAttribute("src") && $.data(this, LOCALSRC) !== undefined &&
+ 					bufferStart($.data(this, LOCALSRC))) {
+						
+						this.parentNode.removeEventListener("ended", streamEnd);
+						playstream(this, $.data(this, LOCALSRC))
+						this.parentNode.addEventListener("ended", streamEnd);
+	 }
+ })
+}
+
+
+function endStream(file) {
+	
+ $.each($('source').get(), function(){
+	  console.log("EndStream tag: " + this.src + "  data : "+ $.data(this, LOCALSRC))
+	 if ($.data(this, LOCALSRC) !== undefined &&
+ 					$.data(this, LOCALSRC).indexOf(file) == 0) {
+						
+						this.parentNode.removeEventListener("ended", streamEnd);
+						playstream(this, $.data(this, LOCALSRC))
+						rcvbuffer[file] = null;
+	 }
+ })
+}
+
+
+function bufferStart(buffkey) {
+	
+	var xblock = rcvbuffer[buffkey].block;
+	var tot = 0;
+	
+	for (i=0; i<xblock.length; i++){
+		tot = tot + xblock[i].length;
+	}
+	return(tot > 500000);
+}
+
+
+function streamEnd(){
+	
+	$.each($(this).children('source'), function(){
+//		console.log("children : " + this.id)
+		if ($.data(this, LOCALSRC) !== undefined){
+			playstream(this, $.data(this, LOCALSRC))
+		}
+	})
+}
+
+
+function playstream(el, buffkey) {
+						var timespot;
+						var url = window.URL || window.webkitURL;
+						var timedelay = 1000;
+		        var audurl;
+					
+							el.parentNode.pause();
+							timespot = el.parentNode.currentTime
+							console.log("Paused time  : " + timespot)
+						
+							if (el.src !== undefined && el.src.length > 0) {
+//								console.log("In revoke");
+								url.revokeObjectURL(el.src);
+							} else {
+								timedelay = 0;
+							}
+							
+							audurl = url.createObjectURL(new Blob(rcvbuffer[buffkey].block,
+														 	{type : rcvbuffer[buffkey].type}));
+					 		el.src=audurl;
+						
+							setTimeout(function(){
+							el.parentNode.load();
+							el.parentNode.currentTime = timespot;
+							el.parentNode.play();	
+							}, timedelay)
+}
+	
 	
 function insertDB(table, values) {
 	
@@ -420,7 +569,8 @@ function insertDB(table, values) {
 	
 	var sqlpk = {table: table, values: values}
 	
-	conn.send('api/insertDB?sqlpk='+ encodeURIComponent(JSON.stringify(sqlpk)))
+	conn.send(xhrCall('api/insertDB?sqlpk='+ 
+			encodeURIComponent(JSON.stringify(sqlpk))))
 }
 
 
@@ -431,7 +581,8 @@ function queryDB(qstr, args, limits) {
 	
 	var sqlpk = {qstr: qstr, args: args, limits: limits}
 	
-	conn.send('api/queryDB?sqlpk='+ encodeURIComponent(JSON.stringify(sqlpk)))
+	conn.send(xhrCall('api/queryDB?sqlpk='+ 
+			encodeURIComponent(JSON.stringify(sqlpk))))
 }
 
 
@@ -446,7 +597,8 @@ function updateDB(table, values, qstr, args) {
 	
 	var sqlpk = {table: table, values: values, qstr: qstr, args: args}
 	
-	conn.send('api/updateDB?sqlpk='+ encodeURIComponent(JSON.stringify(sqlpk)))
+	conn.send(xhrCall('api/updateDB?sqlpk='+ 
+			encodeURIComponent(JSON.stringify(sqlpk))))
 }
 
 
@@ -461,5 +613,6 @@ function removeDB(table, qstr, args) {
 	
 	var sqlpk = {table: table, qstr: qstr, args: args}
 	
-	conn.send('api/removeDB?sqlpk='+ encodeURIComponent(JSON.stringify(sqlpk)))
+	conn.send(xhrCall('api/removeDB?sqlpk='+ 
+			encodeURIComponent(JSON.stringify(sqlpk))))
 }
