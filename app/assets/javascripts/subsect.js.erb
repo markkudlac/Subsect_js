@@ -160,19 +160,17 @@ var appFile = null;
 var rcvbuffer = {};
 
 
-	function initall(apath, aname){
+	function initall(apath, aname, subname){
 		
 		appPath = apath;
 		appName = aname;
 		APPURL = "/app";
 		LOCALSRC = "localsrc"
 		
-//			console.log("appPath : " + appPath)
-		
 	$('#clibut').on("click",function(){
 		
 		if ($("#clibut").text().indexOf("St") == 0){
-			peerClientOn();
+			peerClientOn(subname, $('#peerid').val());
 			
 		} else {
 			conn.close();
@@ -192,17 +190,43 @@ var rcvbuffer = {};
 	}
 	
 	
-	function peerClientOn(){
+	function peerClientOn(subname, peerid){
 		peer = new Peer( {key: 'wcf528rijzx8byb9', debug: 3});
-	
+		
 			peer.on('open', function(id) {
-			  console.log('My peer ID is: ' + id);
-				conn = peer.connect($('#peerid').val(), {reliable: true});
-				$("#clibut").text("Close Client")
-				callserver()
+				
+				if (peerid.length <= 0) {
+					var devport=":3000"
+		
+					<% if (Rails.env.production? ) then %>
+						devport = ""
+					<% end %>
+					
+					$.getJSON("http://" +subname+ ".subsect.net"+devport+"/api/getrtcid/"+subname,
+	    		function(rtnobj){
+	    			if (rtnobj.rtcid.length > 0) {
+	    				makeConnection(rtnobj.rtcid)
+	    			} else {
+	    				alert("Peer id not found")
+	    			}
+	  			})
+	  			.fail(function(xhr, text){
+	    			alert("Server call failed : " + text);
+	  			});
+				} else {
+					makeConnection(peerid);
+				}
 			});
 	}
 	
+	
+	function makeConnection(peerid){
+		
+		conn = peer.connect(peerid, {reliable: true});
+		$("#clibut").text("Close Client")
+		callserver()
+		
+	}
 	
 	function callserver() {
 		
@@ -349,8 +373,19 @@ console.log("In data in : " + data.cnt + "  uri : " + data.uri);
 
 		  // Send messages
 		  conn.send(xhrCall(fullPath(appName.toLowerCase()) + ".html"));
+			startPing()
 			});
 	}	
+	
+	
+	function startPing() {
+		
+		if (conn != null) {
+			console.log("Ping fired")
+			conn.send(xhrCall("sub_ping"))
+			setTimeout(startPing, 30000);
+		}
+	}
 	
 	
 	function blockInclude(str){

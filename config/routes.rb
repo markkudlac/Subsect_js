@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  resources :servers
+
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 
@@ -6,10 +8,17 @@ Rails.application.routes.draw do
   
   # You can have the root of your site routed with "root"
   
-  get 'server', to: 'webrtc#server'
+  #constraints off for subdomain for testing but should go in for "/app"
   get 'app/:appname', to: 'webrtc#client'
   get 'app/', to: 'webrtc#client'
-  root 'webrtc#client'
+  
+  get "/api/getrtcid/:subname", to: "api#getrtcid"
+  get "/api/setrtcid/:subname/:rtcid", to: "api#setrtcid"
+  
+  get "/", to: 'webrtc#client', constraints: 
+      lambda { |r| r.subdomain.present? && r.subdomain != 'www' }
+      
+  root 'static#home'
   
 
   # Example of regular route:

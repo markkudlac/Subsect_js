@@ -1,6 +1,6 @@
 
 	$(document).ready(function(){
 		
-		initall( '<%= appPath %>',  '<%= appName %>');
+		initall( '<%= appPath %>',  '<%= appName %>',  '<%= appSubId %>');
 //			testall()			
 	})

@@ -5,6 +5,9 @@ class WebrtcController < ApplicationController
     puts "PARAMS PASSED : #{app_params(params)[:appname]}"
     @appName = app_params(params)[:appname]
     
+    @appSubId = request.subdomain
+    puts "PeerId : #{@appSubId}"
+    
     if (@appName == nil || @appName.length == 0) then
       redirect_to "/app/Menu"
     elsif (@appName == "TestApp" ||
@@ -13,9 +16,6 @@ class WebrtcController < ApplicationController
     else
       @appPath = "UserHtml/" + @appName + "/"
     end
-  end
-  
-  def server
   end
   
   private
