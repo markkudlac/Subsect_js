@@ -8,6 +8,10 @@
 	<% if current_page?(controller: 'webrtc', action: 'client') then %>
 		<%= javascript_include_tag 'subsect', 'data-turbolinks-track' => true %>
 		<%= javascript_include_tag "http://cdn.peerjs.com/0.3/peer.min.js" %>
+	
+	<!--
+		<%  javascript_include_tag "https://ajax.googleapis.com/ajax/libs/angularjs/1.3.13/angular.min.js" %>
+		-->
 		
 	<% else %>
 		<title>Subsect</title>

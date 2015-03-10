@@ -1,4 +1,10 @@
 
+//This is here to keep the ready from firing before dynamically defined
+//Javascript loads
+
+$.holdReady( true );
+
+
 /* This must load after JQuery */
 
 /*!
@@ -9,7 +15,6 @@
  * Dual licensed under the MIT and GPL licenses.
  * http://benalman.com/about/license/
  */
-
 (function($) {
   // RegExp that matches opening and closing browser-stripped tags.
   // $1 = slash, $2 = tag name, $3 = attributes
@@ -159,6 +164,8 @@ var appPath = null;
 var appFile = null;
 var rcvbuffer = {};
 
+var callbackdb = {};
+var callcnt = 0;
 
 	function initall(apath, aname, subname){
 		
@@ -167,6 +174,7 @@ var rcvbuffer = {};
 		APPURL = "/app";
 		LOCALSRC = "localsrc"
 		
+		/*
 	$('#clibut').on("click",function(){
 		
 		if ($("#clibut").text().indexOf("St") == 0){
@@ -180,7 +188,9 @@ var rcvbuffer = {};
 			$("#clibut").remove()
 		}
 	});
+		*/
 
+		peerClientOn(subname, "");
 	}
 	
 	
@@ -239,7 +249,6 @@ var rcvbuffer = {};
 				
 				var xblob;
 
-console.log("In data in : " + data.cnt + "  uri : " + data.uri);
 				if (data.cnt == 0){
 					xblob = new Blob([ new Uint8Array(data.blob) ], {type : data.blobtype});
 				} else {
@@ -272,14 +281,16 @@ console.log("In data in : " + data.cnt + "  uri : " + data.uri);
 					reader.onload = function(){
 						
 						var xread = JSON.parse(reader.result)
-	
+	//console.log("funcid : " + xread[0].funcid)
 						alert("In api result : " + reader.result)
+						
+						setTimeout(callbackdb[xread[0].funcid], 0, xread[0]);
+						delete callbackdb.xread[0].funcid;
 					}
 					
 					reader.readAsText(xblob);
 					
-				} else if (xblob.type.indexOf("text") == 0 || 
-									xblob.type.indexOf("javascript") > 0){
+				} else if (xblob.type.indexOf("text") == 0){
 					var reader = new FileReader();
 					reader.onload = function(){
 //				      alert("Blob : " + reader.result);
@@ -289,7 +300,6 @@ console.log("In data in : " + data.cnt + "  uri : " + data.uri);
 							 rcvhtml = $.htmlDoc( reader.result );
 							 filecnt = 0;
 							 
-//							 alert("htmlDoc : " + rcvhtml.html());
 // Clear image tags
 							 clearimgsrc(rcvhtml);
 							 
@@ -307,7 +317,15 @@ console.log("In data in : " + data.cnt + "  uri : " + data.uri);
 								 } else if (islocalfile(this.src)){
 									 filecnt++;
 //									 console.log("extract head tags src : "+ extractpath(this.src))
+									 this.setAttribute("sub_src", this.src);
 									 conn.send(xhrCall(fullPath(extractpath(this.src))));
+								 } else {
+									 $.holdReady( true );
+								 	$.getScript(this.src, function(){
+										$.holdReady( false );
+									})
+											this.setAttribute("sub_src", this.src);
+											this.removeAttribute("src");
 								 }
 							 })
 							 
@@ -321,8 +339,6 @@ console.log("In data in : " + data.cnt + "  uri : " + data.uri);
 							 
 							 loadhead(filecnt, rcvhtml);
 							}	else if (xblob.type.indexOf("javascript") > 0) {
-								
-			//					var rmsrc = data.uri.substr(data.uri.indexOf(appName)+appName.length+4)
 								var rmsrc = cleanURI(data.uri)
 								var scrpt = rcvhtml.find('head').children('script[src$="'+rmsrc+'"]')
 								scrpt.removeAttr("src")
@@ -400,29 +416,22 @@ console.log("In data in : " + data.cnt + "  uri : " + data.uri);
 	}
 	
 	
-	/*
-	function endsWith(str, suffix) {
-	    return str.indexOf(suffix, str.length - suffix.length) !== -1;
-	}
-	*/
-	
 	function clearimgsrc(rcvhtml) {
 
 		 $.each(rcvhtml.find('img').get(), function(){
 //			 console.log("clear img src : " + this.src)
-			 if (islocalfile(this.src)){
+			 if (this.src.length > 1 && islocalfile(this.src)){
 			 	$.data(this, LOCALSRC, fullPath(extractpath(this.src)))
 			 	this.removeAttribute("src")
-			 }
+			 } else if (this.src == "#") this.removeAttribute("src");
 		 })
 		 
 		 //Audio
 		 $.each(rcvhtml.find('source').get(), function(){
-			 console.log("clear source src : " + this.src)
-			 if (islocalfile(this.src)){
+			 if (this.src.length > 1 && islocalfile(this.src)){
 			 	$.data(this, LOCALSRC, fullPath(extractpath(this.src)))
 			 	this.removeAttribute("src")
-			 }
+			 } else if (this.src == "#") this.removeAttribute("src");
 		 })
 	}
 	
@@ -431,19 +440,16 @@ console.log("In data in : " + data.cnt + "  uri : " + data.uri);
 		
 	 $.each($('img').get(), function(){
 //		  console.log("fetchimg  : " + this.src + "  data : "+ $.data(this, LOCALSRC))
-		 if (! this.hasAttribute("src") ) {
-			 var xdata = $.data(this, LOCALSRC);
-			 
-			 if (xdata !== undefined) conn.send(xhrCall(xdata));
+		 if (! this.hasAttribute("src") && 
+		 				$.data(this, LOCALSRC) !== undefined){
+			 conn.send(xhrCall($.data(this, LOCALSRC)));
 		 }
 	 })
 	 
 	 $.each($('source').get(), function(){
-		  console.log("fetchimg  source tag: " + this.src + "  data : "+ $.data(this, LOCALSRC))
-		 if (! this.hasAttribute("src") ) {
-			 var xdata = $.data(this, LOCALSRC);
-			 
-			 if (xdata !== undefined) conn.send(xhrCall(xdata));
+		 if (! this.hasAttribute("src") && 
+		 				$.data(this, LOCALSRC) !== undefined){
+			 conn.send(xhrCall($.data(this, LOCALSRC)));
 		 }
 	 })
 	}
@@ -492,12 +498,29 @@ console.log("In data in : " + data.cnt + "  uri : " + data.uri);
 	
 	
 	function loadhead(filecnt, rcvhtml) {
-		
+		var tmp = [];
+		var i = 0;
 		if (filecnt == 0) {
 			$('head').append(rcvhtml.find('head').children())
-			$('body').append(rcvhtml.find('body').children())
+	/*		
+			$.each(rcvhtml.find('head').children(), function(){
+				console.log("Appending : " + this.tagName)
+				tmp[i] = this;
+				setTimeout(function(el){
+					console.log("Making append to head : " + el.tagName);
+					$('head').append($(el))}, 500*i, this);
+					++i;
+			});
+				*/
+			$('body').append(rcvhtml.find('body').children());
 			
 			fetchimgsrc();
+			
+			$(function(){
+				console.log("Call cleanup of local javascript")
+				$("script[sub_src]").empty();
+			})
+			$.holdReady( false );
 		}
 	}
 	
@@ -531,10 +554,8 @@ function driveStream() {
 function endStream(file) {
 	
  $.each($('source').get(), function(){
-	  console.log("EndStream tag: " + this.src + "  data : "+ $.data(this, LOCALSRC))
 	 if ($.data(this, LOCALSRC) !== undefined &&
  					$.data(this, LOCALSRC).indexOf(file) == 0) {
-						
 						this.parentNode.removeEventListener("ended", streamEnd);
 						playstream(this, $.data(this, LOCALSRC))
 						rcvbuffer[file] = null;
@@ -558,7 +579,6 @@ function bufferStart(buffkey) {
 function streamEnd(){
 	
 	$.each($(this).children('source'), function(){
-//		console.log("children : " + this.id)
 		if ($.data(this, LOCALSRC) !== undefined){
 			playstream(this, $.data(this, LOCALSRC))
 		}
@@ -595,26 +615,26 @@ function playstream(el, buffkey) {
 }
 	
 	
-function insertDB(table, values) {
+function insertDB(table, values, func) {
 	
 	if (values == null || Object.keys(values).length == 0) {
 		alert("Error: Insert values is empty")
 		return;
 	}
 	
-	var sqlpk = {table: table, values: values}
+	var sqlpk = {table: table, values: values, funcid: funcID(func)}
 	
 	conn.send(xhrCall('api/insertDB?sqlpk='+ 
 			encodeURIComponent(JSON.stringify(sqlpk))))
 }
 
 
-function queryDB(qstr, args, limits) {
+function queryDB(qstr, args, limits, func) {
 	
 	if (args == null) args = {};
 	if (limits == null) limits = {};
 	
-	var sqlpk = {qstr: qstr, args: args, limits: limits}
+	var sqlpk = {qstr: qstr, args: args, limits: limits, funcid: funcID(func)}
 	
 	conn.send(xhrCall('api/queryDB?sqlpk='+ 
 			encodeURIComponent(JSON.stringify(sqlpk))))
@@ -650,4 +670,14 @@ function removeDB(table, qstr, args) {
 	
 	conn.send(xhrCall('api/removeDB?sqlpk='+ 
 			encodeURIComponent(JSON.stringify(sqlpk))))
+}
+
+
+function funcID(func){
+	
+	var funcidstr = "F_"+callcnt;
+	
+	++callcnt;
+	callbackdb[funcidstr] = func;
+	return(funcidstr);
 }

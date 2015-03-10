@@ -1,6 +1,4 @@
-
-	$(document).ready(function(){
-		
-		initall( '<%= appPath %>',  '<%= appName %>',  '<%= appSubId %>');
-//			testall()			
-	})
+			
+			initall( '<%= appPath %>',  '<%= appName %>',  '<%= appSubId %>');
+//			testall()	
+			$("#subinitrm").remove();	
