@@ -508,22 +508,11 @@ var callcnt = 0;
 		var i = 0;
 		if (filecnt == 0) {
 			$('head').append(rcvhtml.find('head').children())
-	/*		
-			$.each(rcvhtml.find('head').children(), function(){
-				console.log("Appending : " + this.tagName)
-				tmp[i] = this;
-				setTimeout(function(el){
-					console.log("Making append to head : " + el.tagName);
-					$('head').append($(el))}, 500*i, this);
-					++i;
-			});
-				*/
 			$('body').append(rcvhtml.find('body').children());
 			
 			fetchimgsrc();
 			
 			$(function(){
-				console.log("Call cleanup of local javascript")
 				$("script[sub_src]").empty();
 			})
 			$.holdReady( false );
@@ -533,12 +522,15 @@ var callcnt = 0;
 
 function tagWithHref(ev) {
 
+ev.preventDefault();
+
 	var xhref = $(this).attr("href")
 	
 	if (xhref.indexOf("http") < 0){
-		ev.preventDefault();
-		conn.send(xhrCall(xhref))
+		xhref = "http://" + location.host + "/" + xhref
 	}
+//	console.log("tag href : "+xhref)
+	location.assign(xhref);
 }
 
 
