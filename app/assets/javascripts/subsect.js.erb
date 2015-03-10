@@ -281,11 +281,17 @@ var callcnt = 0;
 					reader.onload = function(){
 						
 						var xread = JSON.parse(reader.result)
-	//console.log("funcid : " + xread[0].funcid)
-						alert("In api result : " + reader.result)
+						var tmpfunc = callbackdb[xread[0].funcid];
+						var tmpid = xread[0].funcid
+//	console.log("funcid : " + tmpid)
+//						alert("In api result : " + reader.result);
 						
-						setTimeout(callbackdb[xread[0].funcid], 0, xread[0]);
-						delete callbackdb.xread[0].funcid;
+						delete callbackdb.tmpid;
+						
+						if (tmpfunc !== undefined && tmpfunc != null){
+							delete xread[0].funcid;
+							setTimeout(tmpfunc, 0, xread);
+						}
 					}
 					
 					reader.readAsText(xblob);
@@ -641,7 +647,7 @@ function queryDB(qstr, args, limits, func) {
 }
 
 
-function updateDB(table, values, qstr, args) {
+function updateDB(table, values, qstr, args, func) {
 	
 	if (values == null || Object.keys(values).length == 0) {
 		alert("Error: Update values is empty")
@@ -650,14 +656,14 @@ function updateDB(table, values, qstr, args) {
 	
 	if (qstr == null) { qstr = "";}
 	
-	var sqlpk = {table: table, values: values, qstr: qstr, args: args}
+	var sqlpk = {table: table, values: values, qstr: qstr, args: args, funcid: funcID(func)}
 	
 	conn.send(xhrCall('api/updateDB?sqlpk='+ 
 			encodeURIComponent(JSON.stringify(sqlpk))))
 }
 
 
-function removeDB(table, qstr, args) {
+function removeDB(table, qstr, args, func) {
 	
 	if (args == null || Object.keys(args).length == 0) {
 		alert("Error: removeDB args is empty")
@@ -666,7 +672,7 @@ function removeDB(table, qstr, args) {
 	
 	if (qstr == null) { qstr = ""	}
 	
-	var sqlpk = {table: table, qstr: qstr, args: args}
+	var sqlpk = {table: table, qstr: qstr, args: args, funcid: funcID(func)}
 	
 	conn.send(xhrCall('api/removeDB?sqlpk='+ 
 			encodeURIComponent(JSON.stringify(sqlpk))))
