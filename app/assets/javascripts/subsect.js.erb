@@ -164,6 +164,8 @@ var appPath = null;
 var appFile = null;
 var rcvbuffer = {};
 
+var filecnt = 0;
+
 var callbackdb = {};
 var callcnt = 0;
 
@@ -241,7 +243,7 @@ var callcnt = 0;
 	function callserver() {
 		
 		var rcvhtml = null;
-		var filecnt = 0;
+		var headflg = false
 		
 		conn.on('open', function() {
 		  // Receive messages
@@ -315,36 +317,12 @@ var callcnt = 0;
 							 $("head").attrs(rcvhtml.find('head').attrs());
 							 $("html").attrs(rcvhtml.filter('html').attrs());
 							 
-//							 console.log("Number of script head tags : "+ headtags.length)
-							 $.each(headtags, function(){
-//								 console.log("script head tags src : "+ this.src)
-								 if (blockInclude(this.src)) {
-								 	this.parentNode.removeChild(this);
-								 } else if (islocalfile(this.src)){
-									 filecnt++;
-//									 console.log("extract head tags src : "+ extractpath(this.src))
-									 this.setAttribute("sub_src", this.src);
-									 conn.send(xhrCall(fullPath(extractpath(this.src))));
-								 } else {
-									 $.holdReady( true );
-								 	$.getScript(this.src, function(){
-										$.holdReady( false );
-									})
-											this.setAttribute("sub_src", this.src);
-											this.removeAttribute("src");
-								 }
-							 })
+							 console.log("Number head tags before processHead : "+ headtags.length)
+							 processHead(rcvhtml);
+							 return;
 							 
-							 headtags = rcvhtml.find('head').children('link[rel="stylesheet"]').get();
-							 $.each(headtags, function(){
-								 if (islocalfile(this.href)){
-									 filecnt++;
-									 conn.send(xhrCall(fullPath(extractpath(this.href))));
-								 }
-							 })
-							 
-							 loadhead(filecnt, rcvhtml);
-							}	else if (xblob.type.indexOf("javascript") > 0) {
+							}	else if (xblob.type.indexOf("javascript") > 0 ||
+									xblob.type.indexOf("ng-template") > 0) {
 								var rmsrc = cleanURI(data.uri)
 								var scrpt = rcvhtml.find('head').children('script[src$="'+rmsrc+'"]')
 								scrpt.removeAttr("src")
@@ -398,6 +376,82 @@ var callcnt = 0;
 			startPing()
 			});
 	}	
+	
+	
+function processHead(rcvhtml){
+		
+		
+		/* This is a hack to force remote calls to behave syncronously
+				This should be looked at later. requires all sync remote calls to be at
+				the beginning of the <head>
+	*/
+	
+		var headtags = rcvhtml.find('head').children('script').get();
+		
+//		console.log("ENTER PROCESSHEAD")
+		var dump = false;
+		
+			 $.each(headtags, function(){
+//								 console.log("script head tags src : "+ this.src)
+				 if (this.src != null && this.src.length > 0){	 
+								 if (blockInclude(this.src)) {
+								 	this.parentNode.removeChild(this);
+								 } else if (islocalfile(this.src)){
+									 filecnt++;
+//									 console.log("extract head tags src : "+ extractpath(this.src))
+									 
+									 this.setAttribute("sub_src", this.src);
+									 
+									 var xtyp = this.getAttribute("type");
+									 if (xtyp != null && xtyp.indexOf("ng-template") > 0){
+										 console.log("set Angular id")
+									 		this.setAttribute("id", extractpath(this.src));
+									 }
+									 conn.send(xhrCall(fullPath(extractpath(this.src))));
+								 } else {
+									 $.holdReady( true );
+									 console.log("remote before javscript send : " + this.src +
+								 "  filecnt : " + filecnt)
+									 
+ 									this.setAttribute("sub_src", this.src);
+									var tmpsrc = this.src
+ 									this.removeAttribute("src");
+									
+								 	$.getScript(tmpsrc, function(){
+										$.holdReady( false );
+										console.log("returned from JV call")
+										if (filecnt <= 0) {
+											setTimeout(processHead, 10, rcvhtml)
+										}
+									
+									}).fail(function(err,str){
+										console.log("error getScript : " + str)
+									})
+										 
+	//								this.setAttribute("sub_src", this.src);
+	//								this.removeAttribute("src");
+									
+									if (filecnt <= 0) {
+	//									console.log("filecnt <= 0 JV return")
+										dump = true
+										return false;
+									}
+						 	 	}
+							}
+					})
+		
+					if (!dump) {
+							 headtags = rcvhtml.find('head').children('link[rel="stylesheet"]').get();
+							 $.each(headtags, function(){
+								 if (islocalfile(this.href)){
+									 filecnt++;
+									 conn.send(xhrCall(fullPath(extractpath(this.href))));
+								 }
+							 })
+							 
+							 loadhead(filecnt, rcvhtml);
+						 }
+	}
 	
 	
 	function startPing() {
@@ -472,7 +526,7 @@ var callcnt = 0;
 	
 	function xhrCall(file, cnt, type){
 		
-		if (cnt === undefined || cnt === null) {cnt = 0 }
+		if (!cnt) cnt = 0;
 		if (type === undefined || type === null) {type = "GET" }
 		
 		return({type: type, file: file, cnt: cnt});
