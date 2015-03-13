@@ -275,7 +275,7 @@ var callcnt = 0;
 					}
 				}
 				
-//				console.log("all uri : " + data.uri);
+				console.log("all uri : " + data.uri + "  Type : "+ xblob.type);
 				if (data.uri.indexOf('api/') >= 0 ){
 					
 					console.log("api blob type : " + xblob.type);
@@ -402,12 +402,14 @@ function processHead(rcvhtml){
 									 
 									 this.setAttribute("sub_src", this.src);
 									 
+									 var mimetp = "";
 									 var xtyp = this.getAttribute("type");
 									 if (xtyp != null && xtyp.indexOf("ng-template") > 0){
-										 console.log("set Angular id")
+	//									 console.log("set Angular mimetype")
 									 		this.setAttribute("id", extractpath(this.src));
+											mimetp = "text/ng-template";
 									 }
-									 conn.send(xhrCall(fullPath(extractpath(this.src))));
+									 conn.send(xhrCall(fullPath(extractpath(this.src)),null,null,mimetp));
 								 } else {
 									 $.holdReady( true );
 									 console.log("remote before javscript send : " + this.src +
@@ -457,7 +459,6 @@ function processHead(rcvhtml){
 	function startPing() {
 		
 		if (conn != null) {
-			console.log("Ping fired")
 			conn.send(xhrCall("sub_ping"))
 			setTimeout(startPing, 30000);
 		}
@@ -524,12 +525,13 @@ function processHead(rcvhtml){
 	}
 	
 	
-	function xhrCall(file, cnt, type){
+	function xhrCall(file, cnt, type, mimetp){
 		
 		if (!cnt) cnt = 0;
-		if (type === undefined || type === null) {type = "GET" }
-		
-		return({type: type, file: file, cnt: cnt});
+		if (!type) type = "GET";
+		if (!mimetp) mimetp = "";
+
+		return({type: type, file: file, cnt: cnt, mimetp: mimetp});
 	}
 	
 	
