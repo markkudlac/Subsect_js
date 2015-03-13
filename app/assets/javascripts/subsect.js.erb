@@ -423,7 +423,7 @@ function processHead(rcvhtml){
 										$.holdReady( false );
 										console.log("returned from JV call")
 										if (filecnt <= 0) {
-											setTimeout(processHead, 10, rcvhtml)
+											setTimeout(processHead, 0, rcvhtml)
 										}
 									
 									}).fail(function(err,str){
