@@ -168,6 +168,7 @@ var filecnt = 0;
 
 var callbackdb = {};
 var callcnt = 0;
+var dbname = "";
 
 	function initall(apath, aname, subname){
 		
@@ -175,6 +176,8 @@ var callcnt = 0;
 		appName = aname;
 		APPURL = "/app";
 		LOCALSRC = "localsrc"
+		
+		dbname = getdbname();
 		
 		/*
 	$('#clibut').on("click",function(){
@@ -544,6 +547,8 @@ function processHead(rcvhtml){
 	
 	function extractpath(pathstr){
 		
+/************* This is bad and needs to be looked at later *****************/
+		
 		if (pathstr.indexOf("file:") == 0) return pathstr.substr(pathstr.indexOf('///') + 2);
 		
 		var hostoff = pathstr.indexOf(location.host);
@@ -668,7 +673,14 @@ function playstream(el, buffkey) {
 							}, timedelay)
 }
 	
-	
+
+function getdbname(){
+		
+	var xname = appPath.indexOf("Sys") == 0  ? "S_" : "U_";
+	return (xname + appName);
+}
+
+
 function insertDB(table, values, func) {
 	
 	if (values == null || Object.keys(values).length == 0) {
@@ -676,7 +688,7 @@ function insertDB(table, values, func) {
 		return;
 	}
 	
-	var sqlpk = {table: table, values: values, funcid: funcID(func)}
+	var sqlpk = {db: dbname, table: table, values: values, funcid: funcID(func)}
 	
 	conn.send(xhrCall('api/insertDB?sqlpk='+ 
 			encodeURIComponent(JSON.stringify(sqlpk))))
@@ -688,7 +700,8 @@ function queryDB(qstr, args, limits, func) {
 	if (args == null) args = {};
 	if (limits == null) limits = {};
 	
-	var sqlpk = {qstr: qstr, args: args, limits: limits, funcid: funcID(func)}
+	var sqlpk = {db: dbname, qstr: qstr, args: args,
+					limits: limits, funcid: funcID(func)}
 	
 	conn.send(xhrCall('api/queryDB?sqlpk='+ 
 			encodeURIComponent(JSON.stringify(sqlpk))))
@@ -704,7 +717,8 @@ function updateDB(table, values, qstr, args, func) {
 	
 	if (qstr == null) { qstr = "";}
 	
-	var sqlpk = {table: table, values: values, qstr: qstr, args: args, funcid: funcID(func)}
+	var sqlpk = {db: dbname, table: table, values: values,
+						qstr: qstr, args: args, funcid: funcID(func)}
 	
 	conn.send(xhrCall('api/updateDB?sqlpk='+ 
 			encodeURIComponent(JSON.stringify(sqlpk))))
@@ -720,7 +734,8 @@ function removeDB(table, qstr, args, func) {
 	
 	if (qstr == null) { qstr = ""	}
 	
-	var sqlpk = {table: table, qstr: qstr, args: args, funcid: funcID(func)}
+	var sqlpk = {db: dbname, table: table, qstr: qstr,
+						args: args, funcid: funcID(func)}
 	
 	conn.send(xhrCall('api/removeDB?sqlpk='+ 
 			encodeURIComponent(JSON.stringify(sqlpk))))
