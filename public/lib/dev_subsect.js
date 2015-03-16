@@ -1,4 +1,6 @@
 
+var dbname = getDbName();
+
 function processimg(el, imgsrc){
 	
 	el.src = imgsrc
@@ -39,7 +41,7 @@ function insertDB(table, values, func) {
 		return;
 	}
 	
-	var sqlpk = {table: table, values: values, funcid: ""}
+	var sqlpk = {db: dbname, table: table, values: values, funcid: ""}
 	
 	xhrSend('api/insertDB?sqlpk='+ 
 			encodeURIComponent(JSON.stringify(sqlpk)),func)
@@ -51,7 +53,7 @@ function queryDB(qstr, args, limits, func) {
 	if (args == null) args = {};
 	if (limits == null) limits = {};
 	
-	var sqlpk = {qstr: qstr, args: args, limits: limits, funcid: ""}
+	var sqlpk = {db: dbname, qstr: qstr, args: args, limits: limits, funcid: ""}
 	
 	xhrSend('api/queryDB?sqlpk='+ 
 			encodeURIComponent(JSON.stringify(sqlpk)),func)
@@ -67,7 +69,8 @@ function updateDB(table, values, qstr, args, func) {
 	
 	if (qstr == null) { qstr = "";}
 	
-	var sqlpk = {table: table, values: values, qstr: qstr, args: args, funcid: ""}
+	var sqlpk = {db: dbname, table: table, values: values,
+							qstr: qstr, args: args, funcid: ""}
 	
 	xhrSend('api/updateDB?sqlpk='+ 
 			encodeURIComponent(JSON.stringify(sqlpk)),func)
@@ -83,7 +86,7 @@ function removeDB(table, qstr, args, func) {
 	
 	if (qstr == null) { qstr = ""	}
 	
-	var sqlpk = {table: table, qstr: qstr, args: args, funcid: ""};
+	var sqlpk = {db: dbname, table: table, qstr: qstr, args: args, funcid: ""};
 	
 	xhrSend('api/removeDB?sqlpk='+ 
 			encodeURIComponent(JSON.stringify(sqlpk)),func)
@@ -104,3 +107,24 @@ function xhrSend(dbcall, rtnfunc){
 			}
 	});
 }
+
+
+function getDbName(){
+	
+	var xpath = location.pathname;
+	var dbnm;
+	
+	xpath = xpath.substring(1);
+	console.log("location : "+xpath);
+	xpath = xpath.split("/")
+	
+	dbnm = xpath[0].indexOf("S") == 0 ? "S_" : "U_";
+	xpath = xpath[1].split("#");
+	dbnm = dbnm + xpath[0]
+	
+	console.log("DB name : "+dbnm);
+	return dbnm;
+}
+
+
+
