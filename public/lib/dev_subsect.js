@@ -1,4 +1,10 @@
 
+
+var SYS_DIR = "sys";
+var DB_SYS = "S_";
+var DB_USR = "U_";
+
+// This must be after above defs
 var dbname = getDbName();
 
 function processimg(el, imgsrc){
@@ -25,7 +31,7 @@ function tagWithHref(ev) {
 		if (xhref.indexOf("http") < 0){
 			
 			if (xhref.indexOf("TestApp") >= 0) {
-				xhref = "http://"+location.host + "/SysHtml/TestApp/testapp.html"
+				xhref = "http://"+location.host + "/"+SYS_DIR+"/TestApp/testapp.html"
 			}
 		}
 		console.log("tag 2 href : "+xhref)
@@ -94,9 +100,11 @@ function removeDB(table, qstr, args, func) {
 
 
 function xhrSend(dbcall, rtnfunc){
-	
+
 	$.ajax({
-			url: "http://"+location.host+"/"+dbcall,
+		// This is commented for testing when using nodejs
+	//		url: "http://"+location.host+"/"+dbcall,
+			url: "http://192.168.1.108:8080/"+dbcall,
 			dataFilter: function(xrtn){
 //				console.log("In datafileter : " + xrtn);
 				return(JSON.parse(xrtn));
@@ -112,13 +120,13 @@ function xhrSend(dbcall, rtnfunc){
 function getDbName(){
 	
 	var xpath = location.pathname;
-	var dbnm;
+	var dbnm = "";
 	
 	xpath = xpath.substring(1);
 	console.log("location : "+xpath);
 	xpath = xpath.split("/")
 	
-	dbnm = xpath[0].indexOf("S") == 0 ? "S_" : "U_";
+	dbnm = (xpath[0].indexOf(SYS_DIR) == 0) ? DB_SYS : DB_USR;
 	xpath = xpath[1].split("#");
 	dbnm = dbnm + xpath[0]
 	

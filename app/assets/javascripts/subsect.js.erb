@@ -169,6 +169,9 @@ var filecnt = 0;
 var callbackdb = {};
 var callcnt = 0;
 var dbname = "";
+var SYS_DIR = "sys";
+var DB_SYS ="S_";
+var DB_USR = "U_";
 
 	function initall(apath, aname, subname){
 		
@@ -676,7 +679,7 @@ function playstream(el, buffkey) {
 
 function getdbname(){
 		
-	var xname = appPath.indexOf("Sys") == 0  ? "S_" : "U_";
+	var xname = appPath.indexOf(SYS_DIR) == 0  ? DB_SYS : DB_USR;
 	return (xname + appName);
 }
 

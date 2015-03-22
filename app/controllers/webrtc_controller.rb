@@ -12,9 +12,9 @@ class WebrtcController < ApplicationController
       redirect_to "/app/Menu"
     elsif (@appName == "TestApp" ||
       @appName == "Menu") then
-      @appPath = "SysHtml/" + @appName + "/"
+      @appPath = "sys/" + @appName + "/"
     else
-      @appPath = "UserHtml/" + @appName + "/"
+      @appPath = "usr/" + @appName + "/"
     end
   end
   
