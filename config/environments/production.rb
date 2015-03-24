@@ -78,7 +78,7 @@ Rails.application.configure do
   config.active_record.dump_schema_after_migration = false
   
   #Set for Devise. Set localhost to domain for production
-   config.action_mailer.default_url_options = { :host => 'www.adladl.com' }
+   config.action_mailer.default_url_options = { :host => 'www.subsect.net' }
    
    # Set for exception notification email this is also in development env
    config.middleware.use ExceptionNotifier,
