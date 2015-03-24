@@ -24,6 +24,7 @@ gem 'sdoc', '~> 0.4.0', group: :doc
 # gem 'bcrypt', '~> 3.1.7'
 
 gem 'devise', '~> 3.4.1'
+gem 'exception_notification', "4.1.0.rc1"
 
 group :production do
   gem 'rails_12factor'  # This is for Heroku Rails 4
