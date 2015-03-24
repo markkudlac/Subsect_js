@@ -1,16 +1,14 @@
 <p id="notice"><%= notice %></p>
 
 <p>
+  <strong>Id:</strong>
+  <%= @appzip.id %>
+</p>
+
+<p>
   <strong>User:</strong>
   <%= @appzip.user_id %>
 </p>
-
-<!--
-<p>
-  <strong>Zipfile:</strong>
-  <%= @appzip.zipfile %>
-</p>
--->
 
 <p>
   <strong>Appname:</strong>
@@ -30,6 +28,16 @@
 <p>
   <strong>Icon:</strong>
   <%= @appzip.icon %>
+</p>
+
+<p>
+  <strong>Dbtype:</strong>
+  <%= @appzip.dbtype %>
+</p>
+
+<p>
+  <strong>Status:</strong>
+  <%= @appzip.status %>
 </p>
 
 <%= link_to 'Edit', edit_appzip_path(@appzip) %> |

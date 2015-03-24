@@ -1,5 +1,5 @@
 class AppzipsController < ApplicationController
-  before_action :set_appzip, only: [:show, :edit, :update, :destroy]
+  before_action :set_appzip, only: [:show, :edit, :update, :destroy, :serve]
   before_action :authenticate_user!, except: [:serve]
   
   # GET /appzips
@@ -11,7 +11,6 @@ class AppzipsController < ApplicationController
   # GET /appzips/1
   # GET /appzips/1.json
   def show
-   # @appzip = Appzip.where(user_id: current_user.id)[0]
   end
 
   # GET /appzips/new
@@ -31,7 +30,6 @@ class AppzipsController < ApplicationController
     upload = appzip_params[:zipfile]
     
     @appzip[:zipfile] = Base64.encode64(File.read(upload.path))
- #   @appzip[:zipfile] = upload.read
     @appzip[:filesize] = upload.size
     @appzip[:user_id] = current_user.id
     
@@ -49,12 +47,10 @@ class AppzipsController < ApplicationController
   # PATCH/PUT /appzips/1
   # PATCH/PUT /appzips/1.json
   def update
-   
     upload = appzip_params[:zipfile]
     newparams = appzip_params
      if !upload.nil? then
        newparams[:zipfile] = Base64.encode64(File.read(upload.path))
-  #     newparams[:zipfile] = upload.read
        newparams[:filesize] = upload.size
      end
      
@@ -80,7 +76,6 @@ class AppzipsController < ApplicationController
   end
 
   def serve
-    @appzip = Appzip.where(user_id: 1)[0]
 #    send_data(@appzip[:zipfile], :type => "text/html", :filename => "rootpack.html")
     render json: @appzip
   end
@@ -93,6 +88,7 @@ class AppzipsController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def appzip_params
-      params.require(:appzip).permit(:user_id, :zipfile, :appname, :filesize, :description, :icon)
+      params.require(:appzip).permit(:user_id, :zipfile, :appname, :filesize,
+       :description, :icon, :dbtype)
     end
 end

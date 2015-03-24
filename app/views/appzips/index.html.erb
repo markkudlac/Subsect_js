@@ -6,11 +6,13 @@
   <thead>
     <tr>
       <th>User</th>
-      
+      <th>Id</th>
       <th>Appname</th>
       <th>Filesize</th>
       <th>Description</th>
       <th>Icon</th>
+			<th>Dbtype</th>
+			<th>Status</th>
       <th colspan="3"></th>
     </tr>
   </thead>
@@ -19,11 +21,13 @@
     <% @appzips.each do |appzip| %>
       <tr>
         <td><%= appzip.user_id %></td>
-        
+        <td><%= appzip.id %></td>
         <td><%= appzip.appname %></td>
         <td><%= appzip.filesize %></td>
         <td><%= appzip.description %></td>
         <td><%= appzip.icon %></td>
+				<td><%= appzip.dbtype %></td>
+				<td><%= appzip.status %></td>
         <td><%= link_to 'Show', appzip %></td>
         <td><%= link_to 'Edit', edit_appzip_path(appzip) %></td>
         <td><%= link_to 'Destroy', appzip, method: :delete, data: { confirm: 'Are you sure?' } %></td>
