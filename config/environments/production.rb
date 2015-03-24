@@ -81,7 +81,7 @@ Rails.application.configure do
    config.action_mailer.default_url_options = { :host => 'www.subsect.net' }
    
    # Set for exception notification email this is also in development env
-   config.middleware.use ExceptionNotifier::Rack,
+   config.middleware.use ExceptionNotification::Rack,
      :email => {
        email_prefix: 'Exception ERROR: ',
        sender_address: 'noreply@app24858184.mailgun.org',
