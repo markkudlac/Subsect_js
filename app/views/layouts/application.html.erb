@@ -5,13 +5,9 @@
   <%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track' => true %>
   <%= javascript_include_tag 'application', 'data-turbolinks-track' => true %>
 
-	<% if current_page?(controller: 'webrtc', action: 'client') then %>
+	<% if current_page?(controller: 'webrtc', action: "client") then %>
 		<%= javascript_include_tag 'subsect', 'data-turbolinks-track' => true %>
 		<%= javascript_include_tag "http://cdn.peerjs.com/0.3/peer.min.js" %>
-	
-	<!--
-		<%  javascript_include_tag "https://ajax.googleapis.com/ajax/libs/angularjs/1.3.13/angular.min.js" %>
-		-->
 		
 	<% else %>
 		<title>Subsect</title>
@@ -23,5 +19,12 @@
 
 <%= yield %>
 
+	<% if !current_page?(controller: 'webrtc', action: "client") then %>
+<!--- This is for Devise -->
+		<br/>
+		<p class="notice"><%= notice %></p>
+  	<p class="alert"><%= alert %></p>
+	<% end %>
+	
 </body>
 </html>

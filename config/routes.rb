@@ -1,4 +1,7 @@
 Rails.application.routes.draw do
+  resources :appzips
+
+  devise_for :users
   resources :servers
 
   # The priority is based upon order of creation: first created -> highest priority.
@@ -14,10 +17,14 @@ Rails.application.routes.draw do
   
   get "/api/getrtcid/:subname", to: "api#getrtcid"
   get "/api/setrtcid/:subname/:rtcid", to: "api#setrtcid"
+  get "/api/serve/:id", to: "appzips#serve"
   
   get "/", to: 'webrtc#client', constraints: 
       lambda { |r| r.subdomain.present? && r.subdomain != 'www' }
       
+  get "/test", to: "static#test"
+  
+  get "/fucked", to: "devise/webrtc#client" #stupid but needed for current_page? and devise
   root 'static#home'
   
 

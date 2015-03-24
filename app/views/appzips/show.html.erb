@@ -1,0 +1,36 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>User:</strong>
+  <%= @appzip.user_id %>
+</p>
+
+<!--
+<p>
+  <strong>Zipfile:</strong>
+  <%= @appzip.zipfile %>
+</p>
+-->
+
+<p>
+  <strong>Appname:</strong>
+  <%= @appzip.appname %>
+</p>
+
+<p>
+  <strong>Filesize:</strong>
+  <%= @appzip.filesize %>
+</p>
+
+<p>
+  <strong>Description:</strong>
+  <%= @appzip.description %>
+</p>
+
+<p>
+  <strong>Icon:</strong>
+  <%= @appzip.icon %>
+</p>
+
+<%= link_to 'Edit', edit_appzip_path(@appzip) %> |
+<%= link_to 'Back', appzips_path %>

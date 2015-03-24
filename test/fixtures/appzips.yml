@@ -1,0 +1,17 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  user_id: 1
+  zipfile: MyText
+  appname: MyString
+  filesize: 1
+  description: MyText
+  icon: MyText
+
+two:
+  user_id: 1
+  zipfile: MyText
+  appname: MyString
+  filesize: 1
+  description: MyText
+  icon: MyText

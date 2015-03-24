@@ -23,8 +23,7 @@ gem 'sdoc', '~> 0.4.0', group: :doc
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
 
-# Use Capistrano for deployment
-# gem 'capistrano-rails', group: :development
+gem 'devise', '~> 3.4.1'
 
 group :production do
   gem 'rails_12factor'  # This is for Heroku Rails 4
@@ -42,6 +41,7 @@ group :development, :test do
   gem 'spring'
   gem 'sqlite3'
   gem 'heroku'
+  gem 'letter_opener', "~> 1.0.0"    # This is for mail delivery to browser for testing
 end
 
 ruby "2.2.0"

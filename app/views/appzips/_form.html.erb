@@ -1,0 +1,41 @@
+<%= form_for @appzip, html: { multipart: true } do |f| %>
+  <% if @appzip.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@appzip.errors.count, "error") %> prohibited this appzip from being saved:</h2>
+
+      <ul>
+      <% @appzip.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :user_id %><br>
+    <%= f.number_field :user_id, :disabled => true %>
+  </div>
+  <div class="field">
+    <%= f.label :zipfile %><br>
+    <%= f.file_field :zipfile %>
+  </div>
+  <div class="field">
+    <%= f.label :appname %><br>
+    <%= f.text_field :appname %>
+  </div>
+  <div class="field">
+    <%= f.label :filesize %><br>
+    <%= f.number_field :filesize, :disabled => true %>
+  </div>
+  <div class="field">
+    <%= f.label :description %><br>
+    <%= f.text_area :description %>
+  </div>
+  <div class="field">
+    <%= f.label :icon %><br>
+    <%= f.text_area :icon %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

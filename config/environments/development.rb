@@ -38,4 +38,10 @@ Rails.application.configure do
 
   # Raises error for missing translations
   # config.action_view.raise_on_missing_translations = true
+  
+  #Set for Devise. Set localhost to domain for production
+  config.action_mailer.default_url_options = { :host => '192.168.1.103:3000' }
+  
+  # This will open email in browser
+  config.action_mailer.delivery_method = :letter_opener
 end
