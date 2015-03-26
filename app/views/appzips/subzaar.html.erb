@@ -1,0 +1,66 @@
+<h1>Subzaar</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Id</th>
+      <th>Application</th>
+      <th>Filesize</th>
+      <th>Icon</th>
+			<th>Progress</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @appzips.each do |appzip| %>
+      <tr>
+        <td><%= appzip.id %></td>
+        <td><%= appzip.appname %></td>
+        <td><%= appzip.filesize %></td>
+        <td onclick="runinstall(<%= appzip.id %>, <%= appzip.zipfile.bytesize %>,
+					'<%= appzip.appname %>')">
+					<img id="icon" style="height: 50px; width: 50px" 
+						src="data:image/gif;base64,<%= appzip.icon %>"></td>
+				<td><span id="progmess"></span><br>
+				<span id="progper"></span></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<script> 
+
+$(document).ready(function(){
+	console.log("img src : "+$("#icon").attr("src"))
+	
+})
+
+
+function runinstall(id, filesize, appname){
+	if (typeof android === "undefined" || typeof android.install !== "function") {
+		alert("Can install only from phone");
+	} else if (confirm("Continue to install : " + appname)) {
+		$("#progmess").text("Begin Download")
+		android.install(id, filesize);
+	}
+}
+
+
+function updateProg(percent){
+//	console.log("updateProg : "+percent)
+	if (percent >= 0 && percent <= 100) {
+		$("#progper").text(percent)
+		$("#progmess").text("Downloading File")
+	} else if (percent == -1001){
+		$("#progper").text("")
+		$("#progmess").text("Installing Site")
+	} else if (percent == -1002){
+		$("#progper").text("")
+		$("#progmess").text("Installation Successful")
+	} else {
+		$("#progmess").text("Error : Failed")
+	}
+}
+</script>
+
+

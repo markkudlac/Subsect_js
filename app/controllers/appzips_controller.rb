@@ -1,6 +1,6 @@
 class AppzipsController < ApplicationController
   before_action :set_appzip, only: [:show, :edit, :update, :destroy, :serve]
-  before_action :authenticate_user!, except: [:serve]
+  before_action :authenticate_user!, except: [:serve, :subzaar]
   
   # GET /appzips
   # GET /appzips.json
@@ -32,7 +32,7 @@ class AppzipsController < ApplicationController
     @appzip[:zipfile] = Base64.encode64(File.read(upload.path))
     @appzip[:filesize] = upload.size
     @appzip[:user_id] = current_user.id
-    
+    @appzip[:icon] = Base64.encode64(File.read(appzip_params[:icon].path))
     respond_to do |format|
       if @appzip.save
         format.html { redirect_to @appzip, notice: 'Appzip was successfully created.' }
@@ -52,6 +52,11 @@ class AppzipsController < ApplicationController
      if !upload.nil? then
        newparams[:zipfile] = Base64.encode64(File.read(upload.path))
        newparams[:filesize] = upload.size
+     end
+     
+     upload = appzip_params[:icon]
+     if !upload.nil? then
+       newparams[:icon] = Base64.encode64(File.read(upload.path))
      end
      
     respond_to do |format|
@@ -78,6 +83,10 @@ class AppzipsController < ApplicationController
   def serve
 #    send_data(@appzip[:zipfile], :type => "text/html", :filename => "rootpack.html")
     render json: @appzip
+  end
+  
+  def subzaar
+    @appzips = Appzip.all
   end
   
   private
