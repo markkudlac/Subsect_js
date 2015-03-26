@@ -99,6 +99,12 @@ function removeDB(table, qstr, args, func) {
 }
 
 
+function getMenu(func) {
+	
+	xhrSend('api/getMenu/-1',func);
+}
+
+
 function xhrSend(dbcall, rtnfunc){
 
 	$.ajax({

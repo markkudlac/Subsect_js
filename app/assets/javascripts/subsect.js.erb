@@ -745,6 +745,13 @@ function removeDB(table, qstr, args, func) {
 }
 
 
+function getMenu(func){
+	
+	conn.send(xhrCall('api/getMenu/'+funcID(func)));
+}
+
+
+
 function funcID(func){
 	
 	var funcidstr = "F_"+callcnt;
