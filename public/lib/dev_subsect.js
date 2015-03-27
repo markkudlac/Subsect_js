@@ -109,8 +109,8 @@ function xhrSend(dbcall, rtnfunc){
 
 	$.ajax({
 		// This is commented for testing when using nodejs
-	//		url: "http://"+location.host+"/"+dbcall,
-			url: "http://192.168.1.108:8080/"+dbcall,
+			url: "http://"+location.host+"/"+dbcall,
+		//	url: "http://192.168.1.108:8080/"+dbcall,
 			dataFilter: function(xrtn){
 //				console.log("In datafileter : " + xrtn);
 				return(JSON.parse(xrtn));
