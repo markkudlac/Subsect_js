@@ -267,6 +267,9 @@ var DB_USR = "U_";
 					
 					if (data.cnt == -1) {
 						console.log("Returning from data loop");
+						buflen = rcvbuffer[data.uri].block.length;  //add last block in
+						rcvbuffer[data.uri].block[buflen] = new Uint8Array(data.blob);
+						
 						xblob = new Blob(rcvbuffer[data.uri].block, {type : data.blobtype});
 					} else {
 						console.log("In data loop : " + data.cnt + "  blobsize : " +
