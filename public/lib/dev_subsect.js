@@ -20,7 +20,7 @@ function processimg(el, imgsrc){
 }
 
 
-
+/*
 function tagWithHref(ev) {
 	
 	ev.preventDefault();
@@ -37,7 +37,7 @@ function tagWithHref(ev) {
 		console.log("tag 2 href : "+xhref)
 		location.assign(xhref);
 }
-
+*/
 
 	
 function insertDB(table, values, func) {

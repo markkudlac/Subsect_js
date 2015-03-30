@@ -465,14 +465,24 @@ function processHead(rcvhtml){
 	}
 	
 	
-	function startPing() {
+function startPing() {
 		
+		var pingcnt = 0;
+		var pingtag = " " + new Date().getTime();
+		pingtag = pingtag.slice(-4);
+		
+		console.log("PING TAG : "+pingtag);
+		runPing();
+		
+	function runPing() {
 		if (conn != null) {
-			conn.send(xhrCall("sub_ping"))
-			setTimeout(startPing, 30000);
+			conn.send(xhrCall("sub_ping/"+pingtag+"/"+pingcnt));
+			pingcnt++;
+			setTimeout(runPing, 30000);
 		}
 	}
 	
+}
 	
 	function blockInclude(str){
 		
@@ -587,6 +597,7 @@ function processHead(rcvhtml){
 	}
 	
 
+/*
 function tagWithHref(ev) {
 
 ev.preventDefault();
@@ -596,9 +607,9 @@ ev.preventDefault();
 	if (xhref.indexOf("http") < 0){
 		xhref = "http://" + location.host + "/" + xhref
 	}
-//	console.log("tag href : "+xhref)
 	location.assign(xhref);
 }
+*/
 
 
 function driveStream() {
