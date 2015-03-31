@@ -107,16 +107,31 @@ function getMenu(func) {
 
 function xhrSend(dbcall, rtnfunc){
 
+	var tmpurl;
+	
+	// This is for testing when using nodejs port == 3030
+	
+	if (location.port.indexOf("3030") == 0){
+		var xdbhost = getParam("dbhost");
+		
+		if (xdbhost.length > 0){
+			console.log("Use database host : " + xdbhost);
+			tmpurl = "http://"+xdbhost+"/"+dbcall;
+		} else {
+			tmpurl = "http://192.168.1.108:8080/"+dbcall;
+		}
+	} else {
+		url: "http://"+location.host+"/"+dbcall;
+	}
 	$.ajax({
-		// This is commented for testing when using nodejs
-			url: "http://"+location.host+"/"+dbcall,
-	//		url: "http://192.168.1.108:8080/"+dbcall,
-			dataFilter: function(xrtn){
+		
+		url: tmpurl,
+		dataFilter: function(xrtn){
 //				console.log("In datafileter : " + xrtn);
 				return(JSON.parse(xrtn));
 			},
-			success: rtnfunc,
-			error: function(xhr,text){
+		success: rtnfunc,
+		error: function(xhr,text){
 					alert("XHR Get error : " + text)
 			}
 	});
@@ -140,5 +155,16 @@ function getDbName(){
 	return dbnm;
 }
 
+
+function getParam(val) {
+
+    tmp = [];
+    var items = location.search.substr(1).split("&");
+    for (var index = 0; index < items.length; index++) {
+        tmp = items[index].split("=");
+        if (tmp[0] === val) return(tmp[1]);
+    }
+    return "";
+}
 
 
