@@ -1,6 +1,10 @@
-<h1>Subzaar</h1>
+<div class="container-fluid">
+	
+	<div class="center">
+		<h1>Subzaar</h1>
+	</div>
 
-<table>
+<table class="table table-condensed">
   <thead>
     <tr>
       <th>Id</th>
@@ -28,20 +32,46 @@
   </tbody>
 </table>
 
+</div>
+
+<div id="alertmodal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 id="modaltitle" 
+									class="modal-title alert-danger" style="padding-left: 10px">Alert</h4>
+            </div>
+            <div class="modal-body">
+                <p id="alertmess"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default"
+									 data-dismiss="modal">Close</button>
+								<button id="continueop" type="button"
+									class="btn btn-primary hidden" data-dismiss="modal">Continue</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
 <script> 
 
+/*
 $(document).ready(function(){
 	
-	
 })
-
+*/
 
 function runinstall(id, filesize, appname){
+	console.log("In runinstall : id : " + id)
 	if (typeof android === "undefined" || typeof android.install !== "function") {
-		alert("Can install only from phone");
-	} else if (confirm("Continue to install : " + appname)) {
-		$("#progmess").text("Begin Download")
-		android.install(id, filesize);
+		console.log("Before alert")
+		alertmodal("Can install only from phone");
+	} else {
+		alertmodal("Continue to install : " + appname, function(){
+			$("#progmess").text("Begin Download")
+			android.install(id, filesize);
+		});
 	}
 }
 

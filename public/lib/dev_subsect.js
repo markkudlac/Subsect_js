@@ -100,7 +100,6 @@ function removeDB(table, qstr, args, func) {
 
 
 function getMenu(func) {
-	
 	xhrSend('api/getMenu/-1',func);
 }
 
@@ -121,7 +120,7 @@ function xhrSend(dbcall, rtnfunc){
 			tmpurl = "http://192.168.1.108:8080/"+dbcall;
 		}
 	} else {
-		url: "http://"+location.host+"/"+dbcall;
+		tmpurl = "http://"+location.host+"/"+dbcall;
 	}
 	$.ajax({
 		
