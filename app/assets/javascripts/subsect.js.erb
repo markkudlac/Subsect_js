@@ -241,6 +241,14 @@ var DB_USR = "U_";
 	function makeConnection(peerid){
 		
 		conn = peer.connect(peerid, {reliable: true});
+		conn.on('disconected', function(){
+			console.log("Peer connection DISCONNECTED event, This may be it +++++++++++");
+		});
+		
+		conn.on('error', function(err){
+			console.log("Peer connection ERROR event : " + err.type);
+		});
+		
 		$("#clibut").text("Close Client")
 		callserver()
 		
@@ -250,6 +258,7 @@ var DB_USR = "U_";
 		
 		var rcvhtml = null;
 		var headflg = false
+		
 		
 		conn.on('open', function() {
 		  // Receive messages
@@ -266,14 +275,13 @@ var DB_USR = "U_";
 					rcvbuffer[data.uri].block[data.cnt -  1] = new Uint8Array(data.blob);
 					
 					if (data.cnt == -1) {
-						console.log("Returning from data loop");
 						buflen = rcvbuffer[data.uri].block.length;  //add last block in
 						rcvbuffer[data.uri].block[buflen] = new Uint8Array(data.blob);
 						
 						xblob = new Blob(rcvbuffer[data.uri].block, {type : data.blobtype});
 					} else {
-						console.log("In data loop : " + data.cnt + "  blobsize : " +
-								rcvbuffer[data.uri].block[0].length);
+		//				console.log("In data loop : " + data.cnt + "  blobsize : " +
+		//						rcvbuffer[data.uri].block[0].length);
 								
 						conn.send(xhrCall(data.uri, data.cnt));
 						
@@ -284,7 +292,7 @@ var DB_USR = "U_";
 					}
 				}
 				
-				console.log("all uri : " + data.uri + "  Type : "+ xblob.type);
+//				console.log("all uri : " + data.uri + "  Type : "+ xblob.type);
 				if (data.uri.indexOf('api/') >= 0 ){
 					
 					console.log("api blob type : " + xblob.type);
@@ -294,8 +302,6 @@ var DB_USR = "U_";
 						var xread = JSON.parse(reader.result)
 						var tmpfunc = callbackdb[xread[0].funcid];
 						var tmpid = xread[0].funcid
-//	console.log("funcid : " + tmpid)
-//						alert("In api result : " + reader.result);
 						
 						delete callbackdb.tmpid;
 						
@@ -311,7 +317,7 @@ var DB_USR = "U_";
 					var reader = new FileReader();
 					reader.onload = function(){
 //				      alert("Blob : " + reader.result);
-							console.log("Uri  : "+ data.uri)
+//							console.log("Uri  : "+ data.uri)
 							
 							if (xblob.type.indexOf("html") > 0 ) {
 							 rcvhtml = $.htmlDoc( reader.result );
@@ -326,7 +332,7 @@ var DB_USR = "U_";
 							 $("head").attrs(rcvhtml.find('head').attrs());
 							 $("html").attrs(rcvhtml.filter('html').attrs());
 							 
-							 console.log("Number head tags before processHead : "+ headtags.length)
+//							 console.log("Number head tags before processHead : "+ headtags.length)
 							 processHead(rcvhtml);
 							 return;
 							 
@@ -364,7 +370,7 @@ var DB_USR = "U_";
 						 datatag = $.data(this, LOCALSRC)
 						 
 						 if (datatag !== undefined) {
-						 	console.log("img data : " + datatag + " uri : " + data.uri)
+	//					 	console.log("img data : " + datatag + " uri : " + data.uri)
 
 							if (data.uri.indexOf(datatag) == 0){
 						 		this.src=imgurl
@@ -374,7 +380,7 @@ var DB_USR = "U_";
 						
 				} else if (xblob.type.indexOf("audio") == 0) {
 						//Audio
-					console.log("Audio blob size : " + xblob.size + "  Type : "+xblob.type);
+//					console.log("Audio blob size : " + xblob.size + "  Type : "+xblob.type);
 					
 					endStream(data.uri);
 					}
@@ -396,8 +402,6 @@ function processHead(rcvhtml){
 	*/
 	
 		var headtags = rcvhtml.find('head').children('script').get();
-		
-//		console.log("ENTER PROCESSHEAD")
 		var dump = false;
 		
 			 $.each(headtags, function(){
@@ -421,8 +425,8 @@ function processHead(rcvhtml){
 									 conn.send(xhrCall(fullPath(extractpath(this.src)),null,null,mimetp));
 								 } else {
 									 $.holdReady( true );
-									 console.log("remote before javscript send : " + this.src +
-								 "  filecnt : " + filecnt)
+								//	 console.log("remote before javscript send : " + this.src +
+								// "  filecnt : " + filecnt)
 									 
  									this.setAttribute("sub_src", this.src);
 									var tmpsrc = this.src
@@ -430,7 +434,7 @@ function processHead(rcvhtml){
 									
 								 	$.getScript(tmpsrc, function(){
 										$.holdReady( false );
-										console.log("returned from JV call")
+			//							console.log("returned from JV call")
 										if (filecnt <= 0) {
 											setTimeout(processHead, 0, rcvhtml)
 										}
@@ -438,9 +442,6 @@ function processHead(rcvhtml){
 									}).fail(function(err,str){
 										console.log("error getScript : " + str)
 									})
-										 
-	//								this.setAttribute("sub_src", this.src);
-	//								this.removeAttribute("src");
 									
 									if (filecnt <= 0) {
 	//									console.log("filecnt <= 0 JV return")
