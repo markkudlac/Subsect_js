@@ -166,6 +166,7 @@ var rcvbuffer = {};
 
 var filecnt = 0;
 
+
 var callbackdb = {};
 var callcnt = 0;
 var dbname = "";
@@ -473,8 +474,9 @@ function startPing() {
 		pingtag = pingtag.slice(-4);
 		
 		console.log("PING TAG : "+pingtag);
-		runPing();
+//		runPing();
 		
+		/*
 	function runPing() {
 		if (conn != null) {
 			conn.send(xhrCall("sub_ping/"+pingtag+"/"+pingcnt));
@@ -482,7 +484,7 @@ function startPing() {
 			setTimeout(runPing, 30000);
 		}
 	}
-	
+	*/
 }
 	
 	function blockInclude(str){
