@@ -1,12 +1,19 @@
 
-	<div id="subwrap" class="wrapper" style="display: none">
-	<p>
-		<input id="peerid" type="text" value="" style="font-size: 150%; width: 5em" /> <br/>
-		<button id="clibut" type="button" style="margin-top: 15px; font-size: 150%; padding: 1em 1em">Start Client</button>
-	</p>
-	</div>
+<div id="subinitrm" class="centerspin">
+	<span id="loadspin" class="loading style-2"></span>
+</div>	
 	
-<%= javascript_tag(render( :template => "layouts/client", :formats => [:js], 
-	:locals => {:appPath => @appPath, :appName => @appName, :appSubId => @appSubId}),
-	:id => "subinitrm")
+<script>
+if (util.supports.data) { 
+//	console.log("Data is supported"); 
+	
+<%= render( :template => "layouts/client", :formats => [:js], 
+	:locals => {:appPath => @appPath, :appName => @appName, :appSubId => @appSubId})
 	%>
+	
+} else {
+	$("#loadspin").hide();
+	
+	alert("The current browser does not support WebRTC data");
+}
+</script>

@@ -182,24 +182,7 @@ var DB_USR = "U_";
 		LOCALSRC = "localsrc"
 		
 		dbname = getdbname();
-		
-		/*
-	$('#clibut').on("click",function(){
-		
-		if ($("#clibut").text().indexOf("St") == 0){
-			peerClientOn(subname, $('#peerid').val());
-			
-		} else {
-			conn.close();
-			conn = null;
-			peer.destroy();
-			peer = null;
-			$("#clibut").remove()
-		}
-	});
-		*/
-
-		peerClientOn(subname, "");
+		peerServerOn(subname);
 	}
 	
 	
@@ -208,10 +191,90 @@ var DB_USR = "U_";
 		return(appPath + locpath);
 	}
 	
-	
-	function peerClientOn(subname, peerid){
-		peer = new Peer( {key: 'wcf528rijzx8byb9', debug: 3});
+	function peerServerOn(subname) {
+
+		var xirsysConfig = null;
+		var postdate = null;
 		
+		if(typeof(Storage) !== "undefined") {
+		    postdate = localStorage.getItem("postdate");
+				if (postdate != null) {
+					postdate = parseInt(postdate);
+					
+					//refresh after 24 hours
+					if (new Date().getTime() - postdate < 86400000) {
+						xirsysConfig = localStorage.getItem("xirsysConfig");
+//						console.log("Got xirsysConfig : "+ xirsysConfig);
+					}
+				}
+		}
+		
+		// and override the original config object
+		// Call XirSys ICE servers
+		if (xirsysConfig == null) {
+			$.ajax({
+			  type: "POST",
+			  url: "https://api.xirsys.com/getIceServers",
+	//		  dataType: "json",
+			  data: {
+		  
+			    ident: "markkudlac",
+			    secret: "10633c0a-fb06-4502-a834-de7d1990c3e6",
+			    domain: "subsect.net",
+			    application: "androidserver",
+			    room: "room-1",
+				
+			    /*
+			    ident: "rosemaryp",
+			    secret: "ddb1722f-43ca-4a52-9eed-449875634cc9",
+			    domain: "www.adladl.com",
+			    application: "subserv",
+			    room: "room-1",
+					*/
+			    secure: 1
+			  },
+			  success: function (data, dstatus) {
+				
+				console.log("Completed XirSys : " + JSON.parse(data).d.iceServers[0].url +
+					 "  status : " + dstatus);
+			
+			    peerClientOn(subname, "", JSON.parse(data).d);
+					if(typeof(Storage) !== "undefined") {
+						localStorage.setItem("postdate", new Date().getTime());
+						localStorage.setItem("xirsysConfig", data);
+					}
+			  },
+			  error: function() {
+			    console.log("ERROR  XirSys");
+					peerClientOn(subname, "", null);	//use Google default
+			  }
+			});
+		} else {
+			peerClientOn(subname, "", JSON.parse(xirsysConfig).d);
+		}
+	}
+	
+	
+	
+	function peerClientOn(subname, peerid, customConfig){
+		
+		var opts = {key: 'wcf528rijzx8byb9',
+		//									debug: 3,
+							};
+							
+		if (customConfig != null) opts.config = customConfig;
+										
+		peer = new Peer(opts);
+		
+		/*
+	 peer = new Peer(
+		 {
+			 debug: 3,
+			 host: '192.168.1.103',
+			 port: 9000,
+			 path: '/'
+	   });
+		 */
 			peer.on('open', function(id) {
 				
 				if (peerid.length <= 0) {
@@ -223,18 +286,36 @@ var DB_USR = "U_";
 					
 					$.getJSON("http://" +subname+ ".subsect.net"+devport+"/api/getrtcid/"+subname,
 	    		function(rtnobj){
-	    			if (rtnobj.rtcid.length > 0) {
-	    				makeConnection(rtnobj.rtcid)
+	    			if (rtnobj.rtn !== false) {
+							if (rtnobj.status == "A") {
+	    					makeConnection(rtnobj.rtcid)
+							} else {
+								peerShutDown();
+								clearspinner();
+								alert(subname + " : Is not available currently")
+							}
 	    			} else {
-	    				alert("Peer id not found")
+							peerShutDown();
+							clearspinner();
+	    				alert("Peer id not found");
 	    			}
 	  			})
 	  			.fail(function(xhr, text){
+						peerShutDown();
+						clearspinner();
 	    			alert("Server call failed : " + text);
 	  			});
 				} else {
 					makeConnection(peerid);
 				}
+			});
+			
+			peer.on('error', function(err) {
+				  console.log('Peer client ERROR : ' + err.type + " : " + err.message);
+				});
+				
+		  peer.on('disconnect', function() {
+				console.log('Peer client Disconnect event');
 			});
 	}
 	
@@ -243,24 +324,30 @@ var DB_USR = "U_";
 		
 		conn = peer.connect(peerid, {reliable: true});
 		conn.on('disconected', function(){
-			console.log("Peer connection DISCONNECTED event, This may be it +++++++++++");
+			console.log("Peer.connect DISCONNECTED");
 		});
 		
 		conn.on('error', function(err){
-			console.log("Peer connection ERROR event : " + err.type);
+			console.log("Peer.connect ERROR event : " + err.type + " : " + wrr.message);
 		});
-		
-		$("#clibut").text("Close Client")
 		callserver()
-		
 	}
+	
+	
+	function peerShutDown(){
+		if (peer != null) {
+		        peer.disconnect();
+		        peer.destroy();
+		}
+		peer = null;
+	}
+	
 	
 	function callserver() {
 		
 		var rcvhtml = null;
 		var headflg = false
-		
-		
+			
 		conn.on('open', function() {
 		  // Receive messages
 		  conn.on('data', function(data) {
@@ -296,7 +383,7 @@ var DB_USR = "U_";
 //				console.log("all uri : " + data.uri + "  Type : "+ xblob.type);
 				if (data.uri.indexOf('api/') >= 0 ){
 					
-					console.log("api blob type : " + xblob.type);
+	//				console.log("api blob type : " + xblob.type);
 					var reader = new FileReader();
 					reader.onload = function(){
 						
@@ -389,7 +476,6 @@ var DB_USR = "U_";
 
 		  // Send messages
 		  conn.send(xhrCall(fullPath(appName.toLowerCase()) + ".html"));
-			startPing()
 			});
 	}	
 	
@@ -467,26 +553,6 @@ function processHead(rcvhtml){
 	}
 	
 	
-function startPing() {
-		
-		var pingcnt = 0;
-		var pingtag = " " + new Date().getTime();
-		pingtag = pingtag.slice(-4);
-		
-		console.log("PING TAG : "+pingtag);
-//		runPing();
-		
-		/*
-	function runPing() {
-		if (conn != null) {
-			conn.send(xhrCall("sub_ping/"+pingtag+"/"+pingcnt));
-			pingcnt++;
-			setTimeout(runPing, 30000);
-		}
-	}
-	*/
-}
-	
 	function blockInclude(str){
 		
 		return (str.indexOf("jquery-") >= 0 || str.indexOf("dev_subsect.js") >= 0 );
@@ -560,7 +626,7 @@ function startPing() {
 	function islocalfile(pathstr){
 		
 		if (pathstr.indexOf("file:") == 0) return true
-		return(location.host.length > 0 && pathstr.indexOf(location.host) >= 0)
+		return(window.location.host.length > 0 && pathstr.indexOf(window.location.host) >= 0)
 	}
 	
 	
@@ -571,9 +637,9 @@ function startPing() {
 		if (pathstr.indexOf("file:") == 0) return pathstr.substr(pathstr.indexOf('///') + 2);
 		
 		var hostoff = pathstr.indexOf(location.host);
-		if ( location.host.length > 0 && hostoff >= 0) {
+		if ( window.location.host.length > 0 && hostoff >= 0) {
 			
-			var xpath = pathstr.substr(hostoff + location.host.length+4)
+			var xpath = pathstr.substr(hostoff + window.location.host.length+4)
 			if (xpath.indexOf('/') == 0) xpath = xpath.substr(1)
 //				console.log("raw ex 1 : " + pathstr + " path : " + xpath)
 			return  xpath;
@@ -587,6 +653,11 @@ function startPing() {
 		var tmp = [];
 		var i = 0;
 		if (filecnt == 0) {
+			// This cleans up the spinner etc may not be best
+			
+			clearspinner();
+			
+			
 			$('head').append(rcvhtml.find('head').children())
 			$('body').append(rcvhtml.find('body').children());
 			
@@ -599,21 +670,6 @@ function startPing() {
 		}
 	}
 	
-
-/*
-function tagWithHref(ev) {
-
-ev.preventDefault();
-
-	var xhref = $(this).attr("href")
-	
-	if (xhref.indexOf("http") < 0){
-		xhref = "http://" + location.host + "/" + xhref
-	}
-	location.assign(xhref);
-}
-*/
-
 
 function driveStream() {
 	
@@ -673,7 +729,7 @@ function playstream(el, buffkey) {
 					
 							el.parentNode.pause();
 							timespot = el.parentNode.currentTime
-							console.log("Paused time  : " + timespot)
+//							console.log("Paused time  : " + timespot)
 						
 							if (el.src !== undefined && el.src.length > 0) {
 //								console.log("In revoke");
@@ -768,7 +824,6 @@ function getMenu(func){
 }
 
 
-
 function funcID(func){
 	
 	var funcidstr = "F_"+callcnt;
@@ -777,3 +832,10 @@ function funcID(func){
 	callbackdb[funcidstr] = func;
 	return(funcidstr);
 }
+
+
+function clearspinner(){
+	
+	$("#subinitrm").remove();
+}
+
