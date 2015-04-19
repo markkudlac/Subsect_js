@@ -20,12 +20,16 @@
     <%= f.file_field :zipfile %>
   </div>
   <div class="field">
-    <%= f.label :appname %><br>
-    <%= f.text_field :appname %>
+    <%= f.label :pkgname %><br>
+    <%= f.text_field :pkgname %>
   </div>
   <div class="field">
     <%= f.label :filesize %><br>
     <%= f.number_field :filesize, :disabled => true %>
+  </div>
+  <div class="field">
+    <%= f.label :title %><br>
+    <%= f.text_area :title %>
   </div>
   <div class="field">
     <%= f.label :description %><br>

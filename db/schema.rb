@@ -16,8 +16,9 @@ ActiveRecord::Schema.define(version: 20150323192207) do
   create_table "appzips", force: :cascade do |t|
     t.integer  "user_id",                                 null: false
     t.text     "zipfile",                                 null: false
-    t.string   "appname",     limit: 40
+    t.string   "pkgname",     limit: 15
     t.integer  "filesize",                 default: 0
+    t.string   "title",       limit: 40
     t.text     "description", limit: 1500
     t.text     "icon"
     t.string   "dbtype",      limit: 2,    default: "U_"
@@ -26,6 +27,7 @@ ActiveRecord::Schema.define(version: 20150323192207) do
     t.datetime "updated_at",                              null: false
   end
 
+  add_index "appzips", ["pkgname"], name: "index_appzips_on_pkgname"
   add_index "appzips", ["user_id"], name: "index_appzips_on_user_id"
 
   create_table "servers", force: :cascade do |t|

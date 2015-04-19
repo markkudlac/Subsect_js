@@ -6,8 +6,9 @@
     <tr>
       <th>User</th>
       <th>Id</th>
-      <th>Appname</th>
+      <th>Pkgname</th>
       <th>Filesize</th>
+			<th>Title</th>
       <th>Description</th>
       <th>Icon</th>
 			<th>Dbtype</th>
@@ -21,8 +22,9 @@
       <tr>
         <td><%= appzip.user_id %></td>
         <td><%= appzip.id %></td>
-        <td><%= appzip.appname %></td>
+        <td><%= appzip.pkgname %></td>
         <td><%= appzip.filesize %></td>
+				<td><%= appzip.title %></td>
         <td><%= appzip.description %></td>
         <td><img style="height: 50px; width: 50px" 
 						src="data:image/gif;base64,<%= appzip.icon %>"></td>

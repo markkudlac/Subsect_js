@@ -2,19 +2,22 @@ class WebrtcController < ApplicationController
   
   def client
     
-    puts "PARAMS PASSED : #{app_params(params)[:appname]}"
-    @appName = app_params(params)[:appname]
+#    puts "PARAMS PASSED : #{app_params(params)[:pkgname]}"
+    @appName = app_params(params)[:pkgname]
     
     @appSubId = request.subdomain
     puts "PeerId : #{@appSubId}"
     
-    if (@appName == nil || @appName.length == 0) then
+    if (@appName == nil || @appName.length == 0 || @appName == "Menu") then
       redirect_to "/app/Menu"
-    elsif (@appName == "TestApp" ||
-      @appName == "Menu") then
-      @appPath = "sys/" + @appName + "/"
-    else
-      @appPath = "usr/" + @appName + "/"
+    else  
+      appzip = Appzip.where(pkgname: @appName)
+    
+      if appzip.length > 0 && appzip[0].dbtype == "S_" then
+        @appPath = "sys/" + @appName + "/"
+      else
+        @appPath = "usr/" + @appName + "/"
+      end
     end
   end
   
@@ -24,7 +27,7 @@ class WebrtcController < ApplicationController
   #    puts "PARAMS PASSED : #{xparams}"
   #     xparams = xparams.require(:resolver) if xparams[:resolver]
    
-        xparams.permit(:appname)
+        xparams.permit(:pkgname)
     end
 end
   

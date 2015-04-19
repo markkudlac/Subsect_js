@@ -12,8 +12,8 @@ Rails.application.routes.draw do
   # You can have the root of your site routed with "root"
   
   #constraints off for subdomain for testing but should go in for "/app"
-  get 'app/:appname', to: 'webrtc#client'
-  get 'app/', to: 'webrtc#client'
+  get 'pkg/:pkgname', to: 'webrtc#client'
+  get 'pkg/', to: 'webrtc#client'
   
   get "/api/getrtcid/:subname", to: "api#getrtcid"
   get "/api/setrtcid/:subname/:rtcid", to: "api#setrtcid"

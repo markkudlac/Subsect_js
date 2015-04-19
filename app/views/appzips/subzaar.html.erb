@@ -19,10 +19,10 @@
     <% @appzips.each do |appzip| %>
       <tr>
         <td><%= appzip.id %></td>
-        <td><%= appzip.appname %></td>
+        <td><%= appzip.title %></td>
         <td><%= appzip.filesize %></td>
         <td onclick="runinstall(<%= appzip.id %>, <%= appzip.zipfile.bytesize %>,
-					'<%= appzip.appname %>')">
+					'<%= appzip.title %>')">
 					<img id="icon" style="height: 50px; width: 50px" 
 						src="data:image/gif;base64,<%= appzip.icon %>"></td>
 				<td><span id="progmess"></span><br>
@@ -36,11 +36,11 @@
 
 <script> 
 
-function runinstall(id, filesize, appname){
+function runinstall(id, filesize, title){
 	if (typeof android === "undefined" || typeof android.install !== "function") {
 		sb_alert("Can install only from phone");
 	} else {
-		sb_alert("Continue to install : " + appname, function(){
+		sb_alert("Continue to install : " + title, function(){
 			$("#progmess").text("Begin Download")
 			android.install(id, filesize);
 		});

@@ -3,8 +3,9 @@ class CreateAppzips < ActiveRecord::Migration
     create_table :appzips do |t|
       t.integer :user_id,      :null => false
       t.text :zipfile,        :null => false
-      t.string :appname,       :limit => 40
+      t.string :pkgname,       :limit => 15   #This is the package/directory name
       t.integer :filesize,     :default => 0
+      t.string :title,       :limit => 40     #Descriptive title
       t.text :description,     :limit => 1500
       t.text :icon
       t.string :dbtype,          :limit => 2, :default => "U_"
@@ -13,5 +14,6 @@ class CreateAppzips < ActiveRecord::Migration
     end
     
     add_index :appzips, :user_id
+    add_index :appzips, :pkgname
   end
 end

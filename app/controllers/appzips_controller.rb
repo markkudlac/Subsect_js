@@ -97,7 +97,7 @@ class AppzipsController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def appzip_params
-      params.require(:appzip).permit(:user_id, :zipfile, :appname, :filesize,
-       :description, :icon, :dbtype)
+      params.require(:appzip).permit(:user_id, :zipfile, :pkgname, :filesize,
+       :title, :description, :icon, :dbtype)
     end
 end

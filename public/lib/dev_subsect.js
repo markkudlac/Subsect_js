@@ -19,26 +19,6 @@ function processimg(el, imgsrc){
 	}
 }
 
-
-/*
-function tagWithHref(ev) {
-	
-	ev.preventDefault();
-
-		var xhref = $(this).attr("href")
-	console.log("tag 1 href : "+xhref);
-	
-		if (xhref.indexOf("http") < 0){
-			
-			if (xhref.indexOf("TestApp") >= 0) {
-				xhref = "http://"+location.host + "/"+SYS_DIR+"/TestApp/testapp.html"
-			}
-		}
-		console.log("tag 2 href : "+xhref)
-		location.assign(xhref);
-}
-*/
-
 	
 function insertDB(table, values, func) {
 	
