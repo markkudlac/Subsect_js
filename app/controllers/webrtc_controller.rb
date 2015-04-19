@@ -8,9 +8,11 @@ class WebrtcController < ApplicationController
     @appSubId = request.subdomain
     puts "PeerId : #{@appSubId}"
     
-    if (@appName == nil || @appName.length == 0 || @appName == "Menu") then
-      redirect_to "/app/Menu"
-    else  
+    if (@appName == nil || @appName.length == 0 ) then
+      redirect_to "/pkg/Menu"
+    elsif @appName == "Menu" then
+      @appPath = "sys/Menu/"
+    else
       appzip = Appzip.where(pkgname: @appName)
     
       if appzip.length > 0 && appzip[0].dbtype == "S_" then
