@@ -45,4 +45,4 @@ group :development, :test do
   gem 'letter_opener', "~> 1.0.0"    # This is for mail delivery to browser for testing
 end
 
-ruby "2.2.0"
+ruby "2.2.1"
