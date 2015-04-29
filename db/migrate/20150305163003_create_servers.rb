@@ -4,7 +4,7 @@ class CreateServers < ActiveRecord::Migration
       t.string :subname, :limit => 20, :null => false
       t.string :deviceid, :limit => 50, :null => false
       t.string :rtcid, :limit => 20
-      t.string :status, :limit => 1, :default => "A", :null => false
+      t.string :status, :limit => 1, :default => "O", :null => false
 
       t.timestamps null: false
     end

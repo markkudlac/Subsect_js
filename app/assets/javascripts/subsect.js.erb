@@ -211,46 +211,51 @@ var DB_USR = "U_";
 		
 		// and override the original config object
 		// Call XirSys ICE servers
-		if (xirsysConfig == null) {
-			$.ajax({
-			  type: "POST",
-			  url: "https://api.xirsys.com/getIceServers",
-	//		  dataType: "json",
-			  data: {
+		if (false) {
+			if (xirsysConfig == null) {
+				$.ajax({
+				  type: "POST",
+				  url: "https://api.xirsys.com/getIceServers",
+		//		  dataType: "json",
+				  data: {
 		  
-			    ident: "markkudlac",
-			    secret: "10633c0a-fb06-4502-a834-de7d1990c3e6",
-			    domain: "subsect.net",
-			    application: "androidserver",
-			    room: "room-1",
+				    ident: "markkudlac",
+				    secret: "10633c0a-fb06-4502-a834-de7d1990c3e6",
+				    domain: "subsect.net",
+				    application: "androidserver",
+				    room: "room-1",
 				
-			    /*
-			    ident: "rosemaryp",
-			    secret: "ddb1722f-43ca-4a52-9eed-449875634cc9",
-			    domain: "www.adladl.com",
-			    application: "subserv",
-			    room: "room-1",
-					*/
-			    secure: 1
-			  },
-			  success: function (data, dstatus) {
+				    /*
+				    ident: "rosemaryp",
+				    secret: "ddb1722f-43ca-4a52-9eed-449875634cc9",
+				    domain: "www.adladl.com",
+				    application: "subserv",
+				    room: "room-1",
+						*/
+				    secure: 1
+				  },
+				  success: function (data, dstatus) {
 				
-				console.log("Completed XirSys : " + JSON.parse(data).d.iceServers[0].url +
-					 "  status : " + dstatus);
+					console.log("Completed XirSys : " + JSON.parse(data).d.iceServers[0].url +
+						 "  status : " + dstatus);
 			
-			    peerClientOn(subname, "", JSON.parse(data).d);
-					if(typeof(Storage) !== "undefined") {
-						localStorage.setItem("postdate", new Date().getTime());
-						localStorage.setItem("xirsysConfig", data);
-					}
-			  },
-			  error: function() {
-			    console.log("ERROR  XirSys");
-					peerClientOn(subname, "", null);	//use Google default
-			  }
-			});
-		} else {
-			peerClientOn(subname, "", JSON.parse(xirsysConfig).d);
+				    peerClientOn(subname, "", JSON.parse(data).d);
+						if(typeof(Storage) !== "undefined") {
+							localStorage.setItem("postdate", new Date().getTime());
+							localStorage.setItem("xirsysConfig", data);
+						}
+				  },
+				  error: function() {
+				    console.log("ERROR  XirSys");
+						peerClientOn(subname, "", null);	//use Google default
+				  }
+				});
+			} else {
+				peerClientOn(subname, "", JSON.parse(xirsysConfig).d);
+			}
+		} else{
+			console.log("Using Google default");
+			peerClientOn(subname, "", null);	//use Google default
 		}
 	}
 	
