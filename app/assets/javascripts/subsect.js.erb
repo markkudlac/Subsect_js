@@ -193,25 +193,26 @@ var DB_USR = "U_";
 	
 	function peerServerOn(subname) {
 
-		var xirsysConfig = null;
-		var postdate = null;
+		if (true) {
+			var xirsysConfig = null;
+			var postdate = null;
 		
-		if(typeof(Storage) !== "undefined") {
-		    postdate = localStorage.getItem("postdate");
-				if (postdate != null) {
-					postdate = parseInt(postdate);
+			if(typeof(Storage) !== "undefined") {
+			    postdate = localStorage.getItem("postdate");
+					if (postdate != null) {
+						postdate = parseInt(postdate);
 					
-					//refresh after 24 hours
-					if (new Date().getTime() - postdate < 86400000) {
-						xirsysConfig = localStorage.getItem("xirsysConfig");
-//						console.log("Got xirsysConfig : "+ xirsysConfig);
+						//refresh after 24 hours
+						if (new Date().getTime() - postdate < 86400000) {
+							xirsysConfig = localStorage.getItem("xirsysConfig");
+	//						console.log("Got xirsysConfig : "+ xirsysConfig);
+						}
 					}
-				}
-		}
+			}
 		
-		// and override the original config object
-		// Call XirSys ICE servers
-		if (false) {
+			// and override the original config object
+			// Call XirSys ICE servers
+		
 			if (xirsysConfig == null) {
 				$.ajax({
 				  type: "POST",
