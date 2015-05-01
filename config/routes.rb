@@ -18,6 +18,7 @@ Rails.application.routes.draw do
   get "/api/getrtcid/:subname", to: "api#getrtcid"
   get "/api/setrtcid/:subname/:rtcid", to: "api#setrtcid"
   get "/api/offline/:subname", to: "api#offline"
+  get "/api/control/:subname", to: "api#control"
   get "/api/serve/:id", to: "appzips#serve"
   
   get "/", to: 'webrtc#client', constraints: 

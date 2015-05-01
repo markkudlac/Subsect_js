@@ -44,6 +44,31 @@
    end
    
    
+   def control
+     begin
+       server = Server.where(subname: api_params(params)[:subname])
+       if (0 == server.length) then
+           render :json => {rtn: false}
+      else
+        if (server[0].status == "R") then
+          render :json => {rtn: true, action: "reset"}
+        elsif (server[0].status == "M") then
+          render :json => {rtn: true, action: "mark"}
+        elsif (server[0].status == "P") then
+          render :json => {rtn: true, action: "pro"}
+        elsif (server[0].status == "D") then
+          render :json => {rtn: true, action: "dev"}
+        else
+          render :json => {rtn: false}
+        end
+        
+      end
+         
+    rescue
+      render :json => {rtn: false}
+    end
+   end
+   
  private 
  
   def api_params(xparams)
