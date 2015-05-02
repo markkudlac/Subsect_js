@@ -28,6 +28,8 @@ Rails.application.routes.draw do
   get "/subzaar", to: "appzips#subzaar"
   
   get "/fucked", to: "devise/webrtc#client" #stupid but needed for current_page? and devise
+  get "/shithead", to: "devise/static#home" #stupid but needed for current_page? and devise
+  
   root 'static#home'
   
 
