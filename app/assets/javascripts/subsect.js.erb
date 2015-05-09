@@ -174,394 +174,431 @@ var SYS_DIR = "sys";
 var DB_SYS ="S_";
 var DB_USR = "U_";
 
-	function initall(apath, aname, subname){
-		
-		appPath = apath;
-		appName = aname;
-		APPURL = "/pkg";
-		LOCALSRC = "localsrc"
-		
-		dbname = getdbname();
-		peerServerOn(subname);
-	}
-	
-	
-	function fullPath(locpath){
-		
-		return(appPath + locpath);
-	}
-	
-	function peerServerOn(subname) {
 
-		if (true) {
-			var xirsysConfig = null;
-			var postdate = null;
-		
-			if(typeof(Storage) !== "undefined") {
-			    postdate = localStorage.getItem("postdate");
-					if (postdate != null) {
-						postdate = parseInt(postdate);
-					
-						//refresh after 24 hours
-						if (new Date().getTime() - postdate < 86400000) {
-							xirsysConfig = localStorage.getItem("xirsysConfig");
-	//						console.log("Got xirsysConfig : "+ xirsysConfig);
-						}
+function subsect_useRTC(){
+	return(true)
+}
+
+
+function initall(apath, aname, subname){
+	
+	appPath = apath;
+	appName = aname;
+	APPURL = "/pkg";
+	LOCALSRC = "localsrc"
+
+	dbname = getdbname();
+	peerServerOn(subname);
+}
+
+
+function fullPath(locpath){
+	
+	return(appPath + locpath);
+}
+
+function peerServerOn(subname) {
+
+	if (true) {
+		var xirsysConfig = null;
+		var postdate = null;
+	
+		if(typeof(Storage) !== "undefined") {
+		    postdate = localStorage.getItem("postdate");
+				if (postdate != null) {
+					postdate = parseInt(postdate);
+				
+					//refresh after 24 hours
+					if (new Date().getTime() - postdate < 86400000) {
+						xirsysConfig = localStorage.getItem("xirsysConfig");
+//						console.log("Got xirsysConfig : "+ xirsysConfig);
 					}
-			}
-		
-			// and override the original config object
-			// Call XirSys ICE servers
-		
-			if (xirsysConfig == null) {
-				$.ajax({
-				  type: "POST",
-				  url: "https://api.xirsys.com/getIceServers",
-		//		  dataType: "json",
-				  data: {
-		  
-				    ident: "markkudlac",
-				    secret: "10633c0a-fb06-4502-a834-de7d1990c3e6",
-				    domain: "subsect.net",
-				    application: "androidserver",
-				    room: "room-1",
-				
-				    /*
-				    ident: "rosemaryp",
-				    secret: "ddb1722f-43ca-4a52-9eed-449875634cc9",
-				    domain: "www.adladl.com",
-				    application: "subserv",
-				    room: "room-1",
-						*/
-				    secure: 1
-				  },
-				  success: function (data, dstatus) {
-				
-					console.log("Completed XirSys : " + JSON.parse(data).d.iceServers[0].url +
-						 "  status : " + dstatus);
-			
-				    peerClientOn(subname, "", JSON.parse(data).d);
-						if(typeof(Storage) !== "undefined") {
-							localStorage.setItem("postdate", new Date().getTime());
-							localStorage.setItem("xirsysConfig", data);
-						}
-				  },
-				  error: function() {
-				    console.log("ERROR  XirSys");
-						peerClientOn(subname, "", null);	//use Google default
-				  }
-				});
-			} else {
-				peerClientOn(subname, "", JSON.parse(xirsysConfig).d);
-			}
-		} else{
-			console.log("Using Google default");
-			peerClientOn(subname, "", null);	//use Google default
+				}
 		}
+	
+		// and override the original config object
+		// Call XirSys ICE servers
+	
+		if (xirsysConfig == null) {
+			$.ajax({
+			  type: "POST",
+			  url: "https://api.xirsys.com/getIceServers",
+	//		  dataType: "json",
+			  data: {
+	  
+			    ident: "markkudlac",
+			    secret: "10633c0a-fb06-4502-a834-de7d1990c3e6",
+			    domain: "subsect.net",
+			    application: "androidserver",
+			    room: "room-1",
+			
+			    /*
+			    ident: "rosemaryp",
+			    secret: "ddb1722f-43ca-4a52-9eed-449875634cc9",
+			    domain: "www.adladl.com",
+			    application: "subserv",
+			    room: "room-1",
+					*/
+			    secure: 1
+			  },
+			  success: function (data, dstatus) {
+			
+				console.log("Completed XirSys : " + JSON.parse(data).d.iceServers[0].url +
+					 "  status : " + dstatus);
+		
+			    peerClientOn(subname, "", JSON.parse(data).d);
+					if(typeof(Storage) !== "undefined") {
+						localStorage.setItem("postdate", new Date().getTime());
+						localStorage.setItem("xirsysConfig", data);
+					}
+			  },
+			  error: function() {
+			    console.log("ERROR  XirSys");
+					peerClientOn(subname, "", null);	//use Google default
+			  }
+			});
+		} else {
+			peerClientOn(subname, "", JSON.parse(xirsysConfig).d);
+		}
+	} else{
+		console.log("Using Google default");
+		peerClientOn(subname, "", null);	//use Google default
 	}
+}
+
+
+
+function peerClientOn(subname, peerid, customConfig){
 	
+	var opts = {key: 'wcf528rijzx8byb9',
+	//									debug: 3,
+						};
+						
+	if (customConfig != null) opts.config = customConfig;
+									
+	peer = new Peer(opts);
 	
+	/*
+ peer = new Peer(
+	 {
+		 debug: 3,
+		 host: '192.168.1.103',
+		 port: 9000,
+		 path: '/'
+   });
+	 */
+		peer.on('open', function(id) {
+			
+			if (peerid.length <= 0) {
+				var devport=":3000"
 	
-	function peerClientOn(subname, peerid, customConfig){
-		
-		var opts = {key: 'wcf528rijzx8byb9',
-		//									debug: 3,
-							};
-							
-		if (customConfig != null) opts.config = customConfig;
-										
-		peer = new Peer(opts);
-		
-		/*
-	 peer = new Peer(
-		 {
-			 debug: 3,
-			 host: '192.168.1.103',
-			 port: 9000,
-			 path: '/'
-	   });
-		 */
-			peer.on('open', function(id) {
+				<% if (Rails.env.production? ) then %>
+					devport = ""
+				<% end %>
 				
-				if (peerid.length <= 0) {
-					var devport=":3000"
-		
-					<% if (Rails.env.production? ) then %>
-						devport = ""
-					<% end %>
-					
-					$.getJSON("http://" +subname+ ".subsect.net"+devport+"/api/getrtcid/"+subname,
-	    		function(rtnobj){
-	    			if (rtnobj.rtn !== false) {
-							if (rtnobj.status == "A") {
-	    					makeConnection(rtnobj.rtcid)
-							} else {
-								peerShutDown();
-								clearspinner();
-								alert(subname + " : Is not available currently")
-							}
-	    			} else {
+				$.getJSON("http://" +subname+ ".subsect.net"+devport+"/api/getrtcid/"+subname,
+    		function(rtnobj){
+    			if (rtnobj.rtn !== false) {
+						if (rtnobj.status == "A") {
+    					makeConnection(rtnobj.rtcid)
+						} else {
 							peerShutDown();
 							clearspinner();
-	    				alert("Peer id not found");
-	    			}
-	  			})
-	  			.fail(function(xhr, text){
+							alert(subname + " : Is not available currently")
+						}
+    			} else {
 						peerShutDown();
 						clearspinner();
-	    			alert("Server call failed : " + text);
-	  			});
-				} else {
-					makeConnection(peerid);
-				}
-			});
-			
-			peer.on('error', function(err) {
-				  console.log('Peer client ERROR : ' + err.type + " : " + err.message);
-				});
-				
-		  peer.on('disconnect', function() {
-				console.log('Peer client Disconnect event');
-			});
-	}
-	
-	
-	function makeConnection(peerid){
-		
-		conn = peer.connect(peerid, {reliable: true});
-		conn.on('disconected', function(){
-			console.log("Peer.connect DISCONNECTED");
+    				alert("Peer id not found");
+    			}
+  			})
+  			.fail(function(xhr, text){
+					peerShutDown();
+					clearspinner();
+    			alert("Server call failed : " + text);
+  			});
+			} else {
+				makeConnection(peerid);
+			}
 		});
 		
-		conn.on('error', function(err){
-			console.log("Peer.connect ERROR event : " + err.type + " : " + wrr.message);
-		});
-		callserver()
-	}
-	
-	
-	function peerShutDown(){
-		if (peer != null) {
-		        peer.disconnect();
-		        peer.destroy();
-		}
-		peer = null;
-	}
-	
-	
-	function callserver() {
-		
-		var rcvhtml = null;
-		var headflg = false
+		peer.on('error', function(err) {
+			  alert('Peer client ERROR : ' + err.type + " : " + err.message);
+			});
 			
-		conn.on('open', function() {
-		  // Receive messages
-		  conn.on('data', function(data) {
-				
-				var xblob;
+	  peer.on('disconnect', function() {
+			alert('Peer client Disconnect event');
+		});
+}
 
-				if (data.cnt == 0){
-					xblob = new Blob([ new Uint8Array(data.blob) ], {type : data.blobtype});
-				} else {
-					if (data.cnt == 1) {
-						rcvbuffer[data.uri] = {type: data.blobtype, block: []};
-					}
-					rcvbuffer[data.uri].block[data.cnt -  1] = new Uint8Array(data.blob);
-					
-					if (data.cnt == -1) {
-						buflen = rcvbuffer[data.uri].block.length;  //add last block in
-						rcvbuffer[data.uri].block[buflen] = new Uint8Array(data.blob);
-						
-						xblob = new Blob(rcvbuffer[data.uri].block, {type : data.blobtype});
-					} else {
-		//				console.log("In data loop : " + data.cnt + "  blobsize : " +
-		//						rcvbuffer[data.uri].block[0].length);
-								
-						conn.send(xhrCall(data.uri, data.cnt));
-						
-						if (data.blobtype.indexOf("audio") == 0) {
-							driveStream()
-						}
-						return
-					}
+
+function makeConnection(peerid){
+	
+	conn = peer.connect(peerid, {reliable: true});
+	conn.on('disconected', function(){
+		alert("Peer.connect DISCONNECTED");
+	});
+	
+	conn.on('error', function(err){
+		alert("Peer connect ERROR event : " + err.type + " : " + wrr.message);
+	});
+	callserver()
+}
+
+
+function peerShutDown(){
+	if (peer != null) {
+	        peer.disconnect();
+	        peer.destroy();
+	}
+	peer = null;
+}
+
+
+function callserver() {
+	
+	var rcvhtml = null;
+	var headflg = false
+		
+	conn.on('open', function() {
+	  // Receive messages
+	  conn.on('data', function(data) {
+			
+			var xblob;
+
+			if (data.cnt == 0){
+				xblob = new Blob([ new Uint8Array(data.blob) ], {type : data.blobtype});
+			} else {
+				if (data.cnt == 1) {
+					rcvbuffer[data.uri] = {type: data.blobtype, block: []};
 				}
+				rcvbuffer[data.uri].block[data.cnt -  1] = new Uint8Array(data.blob);
 				
-//				console.log("all uri : " + data.uri + "  Type : "+ xblob.type);
-				if (data.uri.indexOf('api/') >= 0 ){
+				if (data.cnt == -1) {
+					buflen = rcvbuffer[data.uri].block.length;  //add last block in
+					rcvbuffer[data.uri].block[buflen] = new Uint8Array(data.blob);
 					
-	//				console.log("api blob type : " + xblob.type);
-					var reader = new FileReader();
-					reader.onload = function(){
-						
-						var xread = JSON.parse(reader.result)
-						var tmpfunc = callbackdb[xread[0].funcid];
-						var tmpid = xread[0].funcid
-						
-						delete callbackdb.tmpid;
-						
-						if (tmpfunc !== undefined && tmpfunc != null){
-							delete xread[0].funcid;
-							setTimeout(tmpfunc, 0, xread);
-						}
+					xblob = new Blob(rcvbuffer[data.uri].block, {type : data.blobtype});
+			console.log("In data last block : " + data.cnt + "  blobsize : " +
+					rcvbuffer[data.uri].block[0].length + " uri  " + data.uri);
+				} else {
+					console.log("In data loop : " + data.cnt + "  blobsize : " +
+							rcvbuffer[data.uri].block[0].length);
+							
+					conn.send(xhrCall(data.uri, data.cnt));
+					
+					if (data.blobtype.indexOf("audio") == 0) {
+						driveStream()
 					}
-					
-					reader.readAsText(xblob);
-					
-				} else if (xblob.type.indexOf("text") == 0){
-					var reader = new FileReader();
-					reader.onload = function(){
+					return
+				}
+			}
+			
+			processBlob(data, xblob);			
+	  });
+
+	  // Send messages
+//	  console.log("Call for app : "+ fullPath(appName.toLowerCase()) + ".html");
+	  conn.send(xhrCall(fullPath(appName.toLowerCase()) + ".html"));
+		});
+}	
+
+	
+function processBlob(data, xblob){
+//	console.log("processBlob all uri : " + data.uri + "  Type : "+ xblob.type);
+	
+	if (data.uri.indexOf('api/') >= 0 ){
+	
+//				console.log("api blob type : " + xblob.type);
+		var reader = new FileReader();
+		reader.onload = function(){
+		
+			var xread = JSON.parse(reader.result)
+			var tmpfunc = callbackdb[xread[0].funcid];
+			var tmpid = xread[0].funcid
+		
+			delete callbackdb.tmpid;
+		
+			if (tmpfunc !== undefined && tmpfunc != null){
+				delete xread[0].funcid;
+				setTimeout(tmpfunc, 0, xread);
+			}
+		}
+	
+		reader.readAsText(xblob);
+	
+	} else if (xblob.type.indexOf("text") == 0){
+		var reader = new FileReader();
+		reader.onload = function(){
 //				      alert("Blob : " + reader.result);
 //							console.log("Uri  : "+ data.uri)
-							
-							if (xblob.type.indexOf("html") > 0 ) {
-							 rcvhtml = $.htmlDoc( reader.result );
-							 filecnt = 0;
-							 
+			
+				if (xblob.type.indexOf("html") > 0 ) {
+				 rcvhtml = $.htmlDoc( reader.result );
+				 filecnt = 0;
+			 
 // Clear image tags
-							 clearimgsrc(rcvhtml);
-							 
-							 var headtags = rcvhtml.find('head').children('script').get();
+				 clearimgsrc(rcvhtml);
+			 
+				 var headtags = rcvhtml.find('head').children('script').get();
 // Transfer attributes							 
-							 $("body").attrs(rcvhtml.find('body').attrs());
-							 $("head").attrs(rcvhtml.find('head').attrs());
-							 $("html").attrs(rcvhtml.filter('html').attrs());
-							 
-//							 console.log("Number head tags before processHead : "+ headtags.length)
-							 processHead(rcvhtml);
-							 return;
-							 
-							}	else if (xblob.type.indexOf("javascript") > 0 ||
-									xblob.type.indexOf("ng-template") > 0) {
-								var rmsrc = cleanURI(data.uri)
-								var scrpt = rcvhtml.find('head').children('script[src$="'+rmsrc+'"]')
-								scrpt.removeAttr("src")
-								scrpt.html(reader.result)
-								filecnt--;
-								loadhead(filecnt, rcvhtml);
-							} else if (xblob.type.indexOf("css") > 0) {
-								var rmsrc = cleanURI(data.uri)
-								var linkcss = rcvhtml.find('head').children('link[href$="'+rmsrc+'"]')
-								
-				        var locurl = window.URL || window.webkitURL;
-				        var hrefurl= locurl.createObjectURL(xblob);
-								
-								linkcss.attr("href", hrefurl)
-								filecnt--;
-								loadhead(filecnt, rcvhtml);
-							}
-				    };
-						
-	//					console.log("data : "+ data.data)
-						reader.readAsText(xblob)
-						
-					} else if (xblob.type.indexOf("image") == 0) {
-	// HTML will be inserted before any image manipulation
-						var datatag
-		        var url = window.URL || window.webkitURL;
-		        var imgurl = url.createObjectURL(xblob);
-						
-					 $.each($('img').get(), function(){
-						 datatag = $.data(this, LOCALSRC)
-						 
-						 if (datatag !== undefined) {
-	//					 	console.log("img data : " + datatag + " uri : " + data.uri)
+				 $("body").attrs(rcvhtml.find('body').attrs());
+				 $("head").attrs(rcvhtml.find('head').attrs());
+				 $("html").attrs(rcvhtml.filter('html').attrs());
+			 
+				 processHead(rcvhtml);
+				 return;
+			 
+				}	else if (xblob.type.indexOf("javascript") > 0 ||
+						xblob.type.indexOf("ng-template") > 0) {
+					var rmsrc = cleanURI(data.uri)
+					var scrpt = rcvhtml.find('head').children('script[src$="'+rmsrc+'"]')
+					scrpt.removeAttr("src")				
+					scrpt.text(reader.result);
+					filecnt--;
+					loadhead(filecnt, rcvhtml);
+				} else if (xblob.type.indexOf("css") > 0) {
+					var rmsrc = cleanURI(data.uri)
+					var linkcss = rcvhtml.find('head').children('link[href$="'+rmsrc+'"]')
+				
+	        var locurl = window.URL || window.webkitURL;
+	        var hrefurl= locurl.createObjectURL(xblob);
+				
+					linkcss.attr("href", hrefurl)
+					filecnt--;
+					loadhead(filecnt, rcvhtml);
+				}
+	    	};
+		
+//	console.log("data : "+ data.data)
+			reader.readAsText(xblob)
+		
+		} else if (xblob.type.indexOf("image") == 0) {
+// HTML will be inserted before any image manipulation
+			var datatag
+    		var url = window.URL || window.webkitURL;
+    		var imgurl = url.createObjectURL(xblob);
+		
+		 $.each($('img').get(), function(){
+			 datatag = $.data(this, LOCALSRC)
+		 
+			 if (datatag !== undefined) {
+//					 	console.log("img data : " + datatag + " uri : " + data.uri)
 
-							if (data.uri.indexOf(datatag) == 0){
-						 		this.src=imgurl
-						 	}
-						}
-					})
-						
-				} else if (xblob.type.indexOf("audio") == 0) {
-						//Audio
-//					console.log("Audio blob size : " + xblob.size + "  Type : "+xblob.type);
-					
-					endStream(data.uri);
-					}
-		  });
+				if (data.uri.indexOf(datatag) == 0){
+			 		this.src=imgurl
+			 	}
+			}
+		})
+		
+	} else if (xblob.type.indexOf("audio") == 0) {
+			//Audio
+//		console.log("Audio blob size : " + xblob.size + "  Type : "+xblob.type);
+	
+		endStream(data.uri);
+	} else if (xblob.type.indexOf("subfile") == 0){
+		
+		var reader = new FileReader();
+		var xtype = xblob.type;
+		
+		reader.onload = function(){
 
-		  // Send messages
-		  conn.send(xhrCall(fullPath(appName.toLowerCase()) + ".html"));
-			});
-	}	
+			var tmpid = xtype.split('/')[1];
+			var tmpfunc = callbackdb[tmpid];
+//			console.log("In subfile : "+ tmpid + " tmpfunc : "+tmpfunc);
+			
+			delete callbackdb.tmpid;
+		
+			if (tmpfunc !== undefined && tmpfunc != null){
+				setTimeout(tmpfunc, 0, reader.result);
+			}
+		}
+	
+		reader.readAsText(xblob);
+		
+	}
+	
+	clearRcvBuffer(data.uri);
+}
 	
 	
 function processHead(rcvhtml){
 		
-		
-		/* This is a hack to force remote calls to behave syncronously
-				This should be looked at later. requires all sync remote calls to be at
-				the beginning of the <head>
-	*/
-	
-		var headtags = rcvhtml.find('head').children('script').get();
-		var dump = false;
-		
-			 $.each(headtags, function(){
-//								 console.log("script head tags src : "+ this.src)
-				 if (this.src != null && this.src.length > 0){	 
-								 if (blockInclude(this.src)) {
-								 	this.parentNode.removeChild(this);
-								 } else if (islocalfile(this.src)){
-									 filecnt++;
+
+/* This is a hack to force remote calls to behave syncronously
+	This should be looked at later. requires all sync remote calls to be at
+	the beginning of the <head>
+*/
+
+var headtags = rcvhtml.find('head').children('script').get();
+var dump = false;
+
+ 	$.each(headtags, function(){
+//							 console.log("script head tags src : "+ this.src)
+		if (this.src != null && this.src.length > 0){	 
+				 if (blockInclude(this.src)) {
+				 	this.parentNode.removeChild(this);
+				 } else if (islocalfile(this.src)){
+					 filecnt++;
 //									 console.log("extract head tags src : "+ extractpath(this.src))
-									 
-									 this.setAttribute("sub_src", this.src);
-									 
-									 var mimetp = "";
-									 var xtyp = this.getAttribute("type");
-									 if (xtyp != null && xtyp.indexOf("ng-template") > 0){
-	//									 console.log("set Angular mimetype")
-									 		this.setAttribute("id", extractpath(this.src));
-											mimetp = "text/ng-template";
-									 }
-									 conn.send(xhrCall(fullPath(extractpath(this.src)),null,null,mimetp));
-								 } else {
-									 $.holdReady( true );
-								//	 console.log("remote before javscript send : " + this.src +
-								// "  filecnt : " + filecnt)
-									 
- 									this.setAttribute("sub_src", this.src);
-									var tmpsrc = this.src
- 									this.removeAttribute("src");
-									
-								 	$.getScript(tmpsrc, function(){
-										$.holdReady( false );
-			//							console.log("returned from JV call")
-										if (filecnt <= 0) {
-											setTimeout(processHead, 0, rcvhtml)
-										}
-									
-									}).fail(function(err,str){
-										console.log("error getScript : " + str)
-									})
-									
-									if (filecnt <= 0) {
-	//									console.log("filecnt <= 0 JV return")
-										dump = true
-										return false;
-									}
-						 	 	}
-							}
+					 
+					 this.setAttribute("sub_src", this.src);
+					 
+					 var mimetp = "";
+					 var xtyp = this.getAttribute("type");
+					 if (xtyp != null && xtyp.indexOf("ng-template") > 0){
+//									 console.log("set Angular mimetype")
+					 		this.setAttribute("id", extractpath(this.src));
+							mimetp = "text/ng-template";
+					 }
+					 conn.send(xhrCall(fullPath(extractpath(this.src)),null,null,mimetp));
+				 } else {
+					 $.holdReady( true );
+				//	 console.log("remote before javscript send : " + this.src +
+				// "  filecnt : " + filecnt)
+					 
+					this.setAttribute("sub_src", this.src);
+					var tmpsrc = this.src
+					this.removeAttribute("src");
+					
+				 	$.getScript(tmpsrc, function(){
+						$.holdReady( false );
+//							console.log("returned from JV call")
+						if (filecnt <= 0) {
+							setTimeout(processHead, 0, rcvhtml)
+						}
+					
+					}).fail(function(err,str){
+						console.log("error getScript : " + str)
 					})
-		
-					if (!dump) {
-							 headtags = rcvhtml.find('head').children('link[rel="stylesheet"]').get();
-							 $.each(headtags, function(){
-								 if (islocalfile(this.href)){
-									 filecnt++;
-									 conn.send(xhrCall(fullPath(extractpath(this.href))));
-								 }
-							 })
-							 
-							 loadhead(filecnt, rcvhtml);
-						 }
+					
+					if (filecnt <= 0) {
+//									console.log("filecnt <= 0 JV return")
+						dump = true
+						return false;
+					}
+		 	 	}
+			}
+		})
+
+		if (!dump) {
+			 headtags = rcvhtml.find('head').children('link[rel="stylesheet"]').get();
+			 $.each(headtags, function(){
+				 if (islocalfile(this.href)){
+					 filecnt++;
+					 conn.send(xhrCall(fullPath(extractpath(this.href))));
+				 }
+			 })
+			 
+			 loadhead(filecnt, rcvhtml);
+		 }
 	}
 	
 	
 	function blockInclude(str){
 		
-		return (str.indexOf("jquery-") >= 0 || str.indexOf("dev_subsect.js") >= 0 );
+//		return (str.indexOf("jquery-") >= 0 || str.indexOf("dev_subsect.js") >= 0 );
+		return (str.indexOf("dev_subsect.js") >= 0 );
 	}
 	
 	
@@ -696,12 +733,17 @@ function endStream(file) {
 	
  $.each($('source').get(), function(){
 	 if ($.data(this, LOCALSRC) !== undefined &&
- 					$.data(this, LOCALSRC).indexOf(file) == 0) {
-						this.parentNode.removeEventListener("ended", streamEnd);
-						playstream(this, $.data(this, LOCALSRC))
-						rcvbuffer[file] = null;
+ 			$.data(this, LOCALSRC).indexOf(file) == 0) {
+				this.parentNode.removeEventListener("ended", streamEnd);
+				playstream(this, $.data(this, LOCALSRC))
+			//	clearRcvBuffer(file);
 	 }
  })
+}
+
+
+function clearRcvBuffer(bkey){
+	rcvbuffer[bkey] = null;
 }
 
 
@@ -830,9 +872,14 @@ function getMenu(func){
 }
 
 
+function getsubFile(xfile, func){
+	conn.send(xhrCall(fullPath(xfile), 0, "GET", "subfile/"+funcID(func)));
+}
+
+
 function funcID(func){
 	
-	var funcidstr = "F_"+callcnt;
+	var funcidstr = "f_"+callcnt;
 	
 	++callcnt;
 	callbackdb[funcidstr] = func;

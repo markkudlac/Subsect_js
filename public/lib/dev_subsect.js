@@ -12,6 +12,12 @@ var DB_USR = "U_";
 // This must be after above defs
 var dbname = getDbName();
 
+
+function subsect_useRTC(){
+	return(false);
+}
+
+
 function processimg(el, imgsrc){
 	
 	el.src = imgsrc
