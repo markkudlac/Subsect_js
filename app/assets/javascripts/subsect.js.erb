@@ -211,7 +211,7 @@ function peerServerOn(subname) {
 					//refresh after 24 hours
 					if (new Date().getTime() - postdate < 86400000) {
 						xirsysConfig = localStorage.getItem("xirsysConfig");
-//						console.log("Got xirsysConfig : "+ xirsysConfig);
+						console.log("Got xirsysConfig : "+ xirsysConfig);
 					}
 				}
 		}
@@ -220,17 +220,18 @@ function peerServerOn(subname) {
 		// Call XirSys ICE servers
 	
 		if (xirsysConfig == null) {
+			
 			$.ajax({
 			  type: "POST",
-			  url: "https://api.xirsys.com/getIceServers",
+			  url: "https://service.xirsys.com/ice",
 	//		  dataType: "json",
 			  data: {
 	  
 			    ident: "markkudlac",
 			    secret: "10633c0a-fb06-4502-a834-de7d1990c3e6",
 			    domain: "subsect.net",
-			    application: "androidserver",
-			    room: "room-1",
+			    application: "subserver",
+			    room: "default",
 			
 			    /*
 			    ident: "rosemaryp",
@@ -239,14 +240,18 @@ function peerServerOn(subname) {
 			    application: "subserv",
 			    room: "room-1",
 					*/
-			    secure: 1
+			    secure: 1,
+				timeout: 600
 			  },
 			  success: function (data, dstatus) {
 			
-				console.log("Completed XirSys : " + JSON.parse(data).d.iceServers[0].url +
+			
+	//old Xirsys		console.log("Completed XirSys : " + JSON.parse(data).d.iceServers[0].url +
+			console.log("Completed XirSys : " + data.d +
 					 "  status : " + dstatus);
 		
-			    peerClientOn(subname, "", JSON.parse(data).d);
+	//old Xirsys		    peerClientOn(subname, "", JSON.parse(data).d);
+				peerClientOn(subname, "", data.d);
 					if(typeof(Storage) !== "undefined") {
 						localStorage.setItem("postdate", new Date().getTime());
 						localStorage.setItem("xirsysConfig", data);
@@ -258,7 +263,8 @@ function peerServerOn(subname) {
 			  }
 			});
 		} else {
-			peerClientOn(subname, "", JSON.parse(xirsysConfig).d);
+//			 console.log("Before peerClinet on");
+			peerClientOn(subname, "", xirsysConfig.d);
 		}
 	} else{
 		console.log("Using Google default");
@@ -271,7 +277,7 @@ function peerServerOn(subname) {
 function peerClientOn(subname, peerid, customConfig){
 	
 	var opts = {key: 'wcf528rijzx8byb9',
-	//									debug: 3,
+										debug: 3,
 						};
 						
 	if (customConfig != null) opts.config = customConfig;

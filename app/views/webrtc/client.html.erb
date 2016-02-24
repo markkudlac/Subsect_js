@@ -5,7 +5,6 @@
 	
 <script>
 if (util.supports.data) { 
-//	console.log("Data is supported"); 
 	
 <%= render( :template => "layouts/client", :formats => [:js], 
 	:locals => {:appPath => @appPath, :appName => @appName, :appSubId => @appSubId})

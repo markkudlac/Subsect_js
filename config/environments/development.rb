@@ -44,4 +44,8 @@ Rails.application.configure do
   
   # This will open email in browser
   config.action_mailer.delivery_method = :letter_opener
+  
+  # White list local addresses for testing - Mark
+  config.web_console.whitelisted_ips = '192.168.1.0/24'
+  
 end
