@@ -202,7 +202,9 @@ function peerServerOn(subname) {
 	if (true) {
 		var xirsysConfig = null;
 		var postdate = null;
-	
+
+/*	Use local cache to save Ajax call. This is causing trouble now
+		
 		if(typeof(Storage) !== "undefined") {
 		    postdate = localStorage.getItem("postdate");
 				if (postdate != null) {
@@ -215,7 +217,8 @@ function peerServerOn(subname) {
 					}
 				}
 		}
-	
+*/
+			
 		// and override the original config object
 		// Call XirSys ICE servers
 	
@@ -247,8 +250,7 @@ function peerServerOn(subname) {
 			
 			
 	//old Xirsys		console.log("Completed XirSys : " + JSON.parse(data).d.iceServers[0].url +
-			console.log("Completed XirSys : " + data.d +
-					 "  status : " + dstatus);
+			console.log("XirSys ajax status : " + dstatus);
 		
 	//old Xirsys		    peerClientOn(subname, "", JSON.parse(data).d);
 				peerClientOn(subname, "", data.d);
