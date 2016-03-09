@@ -7,6 +7,7 @@ class WebrtcController < ApplicationController
     
     @appSubId = request.subdomain
     puts "PeerId : #{@appSubId}"
+    puts "pkgname : #{@appName}"
     
     if (@appName == nil || @appName.length == 0 ) then
       redirect_to "/pkg/Menu"
@@ -29,7 +30,7 @@ class WebrtcController < ApplicationController
   #    puts "PARAMS PASSED : #{xparams}"
   #     xparams = xparams.require(:resolver) if xparams[:resolver]
    
-        xparams.permit(:pkgname)
+        xparams.permit(:pkgname, :pkgargs)
     end
 end
   

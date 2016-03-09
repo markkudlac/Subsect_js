@@ -1,7 +1,7 @@
 
 document.writeln('<script src="http://code.jquery.com/jquery-2.1.3.min.js"></script>');
 document.writeln('<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>');
-document.writeln('<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">');
+document.writeln('<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6jkkkjj/css/bootstrap.min.css">');
 document.writeln('<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js"></script>');
 document.writeln('<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular-route.min.js"></script>');
 
@@ -108,7 +108,7 @@ function xhrSend(dbcall, rtnfunc){
 			console.log("Use database host : " + xdbhost);
 			tmpurl = "http://"+xdbhost+"/"+dbcall;
 		} else {
-			tmpurl = "http://192.168.1.108:8080/"+dbcall;
+			tmpurl = "http://testdbhost:8080/"+dbcall;
 		}
 	} else {
 		tmpurl = "http://"+location.host+"/"+dbcall;

@@ -31,6 +31,9 @@ $.holdReady( true );
     var elems = $();
     // Input HTML string, parsed to include placeholder DIVs. Replace HTML,
     // HEAD, BODY tags with DIV placeholders.
+	
+//	console.log("html original : "+html)
+	
     var htmlParsed = html.replace(matchTag, function(tag, slash, name, attrs) {
       // Temporary object in which to hold attributes.
       var obj = {};
@@ -43,8 +46,7 @@ $.holdReady( true );
         // those attributes. Then, copy each attribute from the temporary div
         // over to the temporary object.
         if ( attrs ) {
-          $.each($('<div' + attrs + '/>')[0].attributes, function(i, attr) {
-						
+          $.each($('<div' + attrs + '/>')[0].attributes, function(i, attr) {				
             obj[attr.name] = attr.value;
           });
         }
@@ -121,6 +123,7 @@ function testall(){
 	
 //	var xstr = '<html><head> <script>alert("HD")<\/script> <script src="zzz"><\/script> </head><body id="xbdy" class="xcl"><div id="out"><div id="div1">Hello world</div><div id="div2">Hi there</div></div></body></html>'
 
+/*
 var xstr = '<html ng-app><head> '+
         '<meta charset="UTF-8"></meta><title>Subsect Android</title> '+
         '<script src="/localjs/client.js"><\/script> ' +
@@ -131,6 +134,8 @@ var xstr = '<html ng-app><head> '+
 	alert("xstr : " + xstr)
 
 	var xhd = $.htmlDoc( xstr );
+	*/
+	
 /*
 	var xblob = new Blob(['alert("HI FRED")'], {type : 'text/javascript'})
 			        var url = window.URL || window.webkitURL;
@@ -406,7 +411,7 @@ function callserver() {
 	  });
 
 	  // Send messages
-//	  console.log("Call for app : "+ fullPath(appName.toLowerCase()) + ".html");
+	  console.log("Call for app : "+ fullPath(appName.toLowerCase()) + ".html");
 	  conn.send(xhrCall(fullPath(appName.toLowerCase()) + ".html"));
 		});
 }	
@@ -443,12 +448,13 @@ function processBlob(data, xblob){
 			
 				if (xblob.type.indexOf("html") > 0 ) {
 				 rcvhtml = $.htmlDoc( reader.result );
+
 				 filecnt = 0;
 			 
 // Clear image tags
 				 clearimgsrc(rcvhtml);
 			 
-				 var headtags = rcvhtml.find('head').children('script').get();
+//				 var headtags = rcvhtml.find('head').children('script').get();
 // Transfer attributes							 
 				 $("body").attrs(rcvhtml.find('body').attrs());
 				 $("head").attrs(rcvhtml.find('head').attrs());
@@ -466,12 +472,13 @@ function processBlob(data, xblob){
 					filecnt--;
 					loadhead(filecnt, rcvhtml);
 				} else if (xblob.type.indexOf("css") > 0) {
+					
 					var rmsrc = cleanURI(data.uri)
 					var linkcss = rcvhtml.find('head').children('link[href$="'+rmsrc+'"]')
 				
 	        var locurl = window.URL || window.webkitURL;
 	        var hrefurl= locurl.createObjectURL(xblob);
-				
+//				console.log("for css data.uri : "+data.uri+"  Cleaned : "+rmsrc+"   hrefurl : "+hrefurl)
 					linkcss.attr("href", hrefurl)
 					filecnt--;
 					loadhead(filecnt, rcvhtml);
@@ -540,30 +547,34 @@ function processHead(rcvhtml){
 
 var headtags = rcvhtml.find('head').children('script').get();
 var dump = false;
+var thissrc;
+//alert("In processHead : " + rcvhtml.find('head').children('script').get(1).outerHTML);
 
  	$.each(headtags, function(){
-//							 console.log("script head tags src : "+ this.src)
-		if (this.src != null && this.src.length > 0){	 
-				 if (blockInclude(this.src)) {
+		
+		this_src = this.getAttribute("src")
+// console.log("script head tags attr src : "+ this_src)
+		if (this_src != null && this_src.length > 0){	 
+				 if (blockInclude(this_src)) {
 				 	this.parentNode.removeChild(this);
 				 } else if (islocalfile(this.src)){
 					 filecnt++;
-//									 console.log("extract head tags src : "+ extractpath(this.src))
-					 
-					 this.setAttribute("sub_src", this.src);
+//					 console.log("extract head tags src : "+ this.src)
+					 this.setAttribute("sub_src", this_src);
 					 
 					 var mimetp = "";
 					 var xtyp = this.getAttribute("type");
 					 if (xtyp != null && xtyp.indexOf("ng-template") > 0){
 //									 console.log("set Angular mimetype")
-					 		this.setAttribute("id", extractpath(this.src));
+							this.setAttribute("id", this_src);
 							mimetp = "text/ng-template";
 					 }
-					 conn.send(xhrCall(fullPath(extractpath(this.src)),null,null,mimetp));
+
+					 conn.send(xhrCall(fullPath(this_src),null,null,mimetp));
 				 } else {
 					 $.holdReady( true );
-				//	 console.log("remote before javscript send : " + this.src +
-				// "  filecnt : " + filecnt)
+//					 console.log("remote before javscript send : " + this.src +
+//				 "  filecnt : " + filecnt)
 					 
 					this.setAttribute("sub_src", this.src);
 					var tmpsrc = this.src
@@ -594,7 +605,7 @@ var dump = false;
 			 $.each(headtags, function(){
 				 if (islocalfile(this.href)){
 					 filecnt++;
-					 conn.send(xhrCall(fullPath(extractpath(this.href))));
+					 conn.send(xhrCall(fullPath(this.getAttribute("href"))));
 				 }
 			 })
 			 
@@ -605,7 +616,6 @@ var dump = false;
 	
 	function blockInclude(str){
 		
-//		return (str.indexOf("jquery-") >= 0 || str.indexOf("dev_subsect.js") >= 0 );
 		return (str.indexOf("dev_subsect.js") >= 0 );
 	}
 	
@@ -621,7 +631,7 @@ var dump = false;
 		 $.each(rcvhtml.find('img').get(), function(){
 //			 console.log("clear img src : " + this.src)
 			 if (this.src.length > 1 && islocalfile(this.src)){
-			 	$.data(this, LOCALSRC, fullPath(extractpath(this.src)))
+				 $.data(this, LOCALSRC, fullPath(this.getAttribute("src")))
 			 	this.removeAttribute("src")
 			 } else if (this.src == "#") this.removeAttribute("src");
 		 })
@@ -629,7 +639,7 @@ var dump = false;
 		 //Audio
 		 $.each(rcvhtml.find('source').get(), function(){
 			 if (this.src.length > 1 && islocalfile(this.src)){
-			 	$.data(this, LOCALSRC, fullPath(extractpath(this.src)))
+				$.data(this, LOCALSRC, fullPath(this.getAttribute("src")))
 			 	this.removeAttribute("src")
 			 } else if (this.src == "#") this.removeAttribute("src");
 		 })
@@ -639,7 +649,6 @@ var dump = false;
 	function fetchimgsrc(){
 		
 	 $.each($('img').get(), function(){
-//		  console.log("fetchimg  : " + this.src + "  data : "+ $.data(this, LOCALSRC))
 		 if (! this.hasAttribute("src") && 
 		 				$.data(this, LOCALSRC) !== undefined){
 			 conn.send(xhrCall($.data(this, LOCALSRC)));
@@ -675,30 +684,29 @@ var dump = false;
 	
 	
 	function islocalfile(pathstr){
-		
-		if (pathstr.indexOf("file:") == 0) return true
 		return(window.location.host.length > 0 && pathstr.indexOf(window.location.host) >= 0)
 	}
 	
-	
+
+/************* This is bad and needs to be looked at later *****************/
+/*		
 	function extractpath(pathstr){
 		
-/************* This is bad and needs to be looked at later *****************/
-		
-		if (pathstr.indexOf("file:") == 0) return pathstr.substr(pathstr.indexOf('///') + 2);
-		
+		console.log("this is location.host :" + location.host)
 		var hostoff = pathstr.indexOf(location.host);
+		
 		if ( window.location.host.length > 0 && hostoff >= 0) {
 			
 			var xpath = pathstr.substr(hostoff + window.location.host.length+4)
+			console.log("this is xpath :" + xpath)
 			if (xpath.indexOf('/') == 0) xpath = xpath.substr(1)
-//				console.log("raw ex 1 : " + pathstr + " path : " + xpath)
+				console.log("raw ex 1 : " + pathstr + " path : " + xpath)
 			return  xpath;
 		} else {
 			return pathstr;
 		}
 	}
-	
+*/	
 	
 	function loadhead(filecnt, rcvhtml) {
 		var tmp = [];
@@ -707,8 +715,7 @@ var dump = false;
 			// This cleans up the spinner etc may not be best
 			
 			clearspinner();
-			
-			
+				
 			$('head').append(rcvhtml.find('head').children())
 			$('body').append(rcvhtml.find('body').children());
 			

@@ -12,6 +12,7 @@ Rails.application.routes.draw do
   # You can have the root of your site routed with "root"
   
   #constraints off for subdomain for testing but should go in for "/app"
+  get 'pkg/:pkgname/*pkgargs', to: 'webrtc#client'
   get 'pkg/:pkgname', to: 'webrtc#client'
   get 'pkg/', to: 'webrtc#client'
   
