@@ -398,7 +398,7 @@ function callserver() {
 					console.log("In data loop : " + data.cnt + "  blobsize : " +
 							rcvbuffer[data.uri].block[0].length);
 							
-					conn.send(xhrCall(data.uri, data.cnt));
+					conn.send(xhrCall(data.uri, null, data.cnt));
 					
 					if (data.blobtype.indexOf("audio") == 0) {
 						driveStream()
@@ -570,7 +570,7 @@ var thissrc;
 							mimetp = "text/ng-template";
 					 }
 
-					 conn.send(xhrCall(fullPath(this_src),null,null,mimetp));
+					 conn.send(xhrCall(fullPath(this_src),null,null,null,mimetp));
 				 } else {
 					 $.holdReady( true );
 //					 console.log("remote before javscript send : " + this.src +
@@ -673,13 +673,14 @@ var thissrc;
 	}
 	
 	
-	function xhrCall(file, cnt, type, mimetp){
+	function xhrCall(file, args, cnt, type, mimetp){
 		
+		if (!args) args = "";
 		if (!cnt) cnt = 0;
 		if (!type) type = "GET";
 		if (!mimetp) mimetp = "";
 
-		return({type: type, file: file, cnt: cnt, mimetp: mimetp});
+		return({type: type, file: file, args: args, cnt: cnt, mimetp: mimetp});
 	}
 	
 	
@@ -687,26 +688,6 @@ var thissrc;
 		return(window.location.host.length > 0 && pathstr.indexOf(window.location.host) >= 0)
 	}
 	
-
-/************* This is bad and needs to be looked at later *****************/
-/*		
-	function extractpath(pathstr){
-		
-		console.log("this is location.host :" + location.host)
-		var hostoff = pathstr.indexOf(location.host);
-		
-		if ( window.location.host.length > 0 && hostoff >= 0) {
-			
-			var xpath = pathstr.substr(hostoff + window.location.host.length+4)
-			console.log("this is xpath :" + xpath)
-			if (xpath.indexOf('/') == 0) xpath = xpath.substr(1)
-				console.log("raw ex 1 : " + pathstr + " path : " + xpath)
-			return  xpath;
-		} else {
-			return pathstr;
-		}
-	}
-*/	
 	
 	function loadhead(filecnt, rcvhtml) {
 		var tmp = [];
@@ -811,7 +792,19 @@ function playstream(el, buffkey) {
 							el.parentNode.play();	
 							}, timedelay)
 }
-	
+
+
+function getParam(val) {
+
+    tmp = [];
+    var items = location.search.substr(1).split("&");
+    for (var index = 0; index < items.length; index++) {
+        tmp = items[index].split("=");
+        if (tmp[0] === val) return(tmp[1]);
+    }
+    return "";
+}	
+
 
 function getdbname(){
 		
@@ -826,11 +819,11 @@ function insertDB(table, values, func) {
 		alert("Error: Insert values is empty")
 		return;
 	}
-	
+
 	var sqlpk = {db: dbname, table: table, values: values, funcid: funcID(func)}
-	
-	conn.send(xhrCall('api/insertDB?sqlpk='+ 
-			encodeURIComponent(JSON.stringify(sqlpk))))
+
+	conn.send(xhrCall('api/insertDB', 'sqlpk='+ 
+			encodeURIComponent(JSON.stringify(sqlpk)), 0, "POST"))
 }
 
 
@@ -842,7 +835,7 @@ function queryDB(qstr, args, limits, func) {
 	var sqlpk = {db: dbname, qstr: qstr, args: args,
 					limits: limits, funcid: funcID(func)}
 	
-	conn.send(xhrCall('api/queryDB?sqlpk='+ 
+	conn.send(xhrCall('api/queryDB','sqlpk='+ 
 			encodeURIComponent(JSON.stringify(sqlpk))))
 }
 
@@ -858,9 +851,9 @@ function updateDB(table, values, qstr, args, func) {
 	
 	var sqlpk = {db: dbname, table: table, values: values,
 						qstr: qstr, args: args, funcid: funcID(func)}
-	
-	conn.send(xhrCall('api/updateDB?sqlpk='+ 
-			encodeURIComponent(JSON.stringify(sqlpk))))
+
+	conn.send(xhrCall('api/updateDB', 'sqlpk='+ 
+			encodeURIComponent(JSON.stringify(sqlpk)), 0, "POST"))
 }
 
 
@@ -876,7 +869,7 @@ function removeDB(table, qstr, args, func) {
 	var sqlpk = {db: dbname, table: table, qstr: qstr,
 						args: args, funcid: funcID(func)}
 	
-	conn.send(xhrCall('api/removeDB?sqlpk='+ 
+	conn.send(xhrCall('api/removeDB', 'sqlpk='+ 
 			encodeURIComponent(JSON.stringify(sqlpk))))
 }
 
@@ -888,7 +881,7 @@ function getMenu(func){
 
 
 function getsubFile(xfile, func){
-	conn.send(xhrCall(fullPath(xfile), 0, "GET", "subfile/"+funcID(func)));
+	conn.send(xhrCall(fullPath(xfile), null, 0, "GET", "subfile/"+funcID(func)));
 }
 
 

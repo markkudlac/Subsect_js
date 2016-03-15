@@ -37,22 +37,23 @@ function insertDB(table, values, func) {
 		alert("Error: Insert values is empty")
 		return;
 	}
-	
+// console.log("New insert with POST")
 	var sqlpk = {db: dbname, table: table, values: values, funcid: ""}
 	
-	xhrSend('api/insertDB?sqlpk='+ 
-			encodeURIComponent(JSON.stringify(sqlpk)),func)
+	xhrSend('api/insertDB', 'sqlpk=' +
+			encodeURIComponent(JSON.stringify(sqlpk)),func, "POST")
 }
 
 
 function queryDB(qstr, args, limits, func) {
 	
+	console.log("New dbquery")
 	if (args == null) args = {};
 	if (limits == null) limits = {};
 	
 	var sqlpk = {db: dbname, qstr: qstr, args: args, limits: limits, funcid: ""}
 	
-	xhrSend('api/queryDB?sqlpk='+ 
+	xhrSend('api/queryDB', 'sqlpk='+ 
 			encodeURIComponent(JSON.stringify(sqlpk)),func)
 }
 
@@ -69,8 +70,9 @@ function updateDB(table, values, qstr, args, func) {
 	var sqlpk = {db: dbname, table: table, values: values,
 							qstr: qstr, args: args, funcid: ""}
 	
-	xhrSend('api/updateDB?sqlpk='+ 
-			encodeURIComponent(JSON.stringify(sqlpk)),func)
+	var argstr = 'sqlpk='+ encodeURIComponent(JSON.stringify(sqlpk));
+	
+	xhrSend('api/updateDB', argstr, func, "POST")					
 }
 
 
@@ -81,21 +83,21 @@ function removeDB(table, qstr, args, func) {
 		return;
 	}
 	
-	if (qstr == null) { qstr = ""	}
+	if (qstr == null) { qstr = "" }
 	
 	var sqlpk = {db: dbname, table: table, qstr: qstr, args: args, funcid: ""};
 	
-	xhrSend('api/removeDB?sqlpk='+ 
+	xhrSend('api/removeDB', 'sqlpk='+ 
 			encodeURIComponent(JSON.stringify(sqlpk)),func)
 }
 
 
 function getMenu(func) {
-	xhrSend('api/getMenu/-1',func);
+	xhrSend('api/getMenu/-1','',func);
 }
 
 
-function xhrSend(dbcall, rtnfunc){
+function xhrSend(dbcall, argstr, rtnfunc,httpmethod){
 
 	var tmpurl;
 	
@@ -113,9 +115,17 @@ function xhrSend(dbcall, rtnfunc){
 	} else {
 		tmpurl = "http://"+location.host+"/"+dbcall;
 	}
+	
+	if (!httpmethod) httpmethod = "GET";
+	
+	// There is a cross domain problem with PUT
+	
 	$.ajax({
 		
 		url: tmpurl,
+		method: httpmethod,
+		data: argstr,
+//		crossDomain: true,
 		dataFilter: function(xrtn){
 //				console.log("In datafileter : " + xrtn);
 				return(JSON.parse(xrtn));
