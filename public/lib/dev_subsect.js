@@ -31,14 +31,16 @@ function processimg(el, imgsrc){
 }
 
 	
-function insertDB(table, values, func) {
+function insertDB(table, values, func, password) {
 	
 	if (values == null || Object.keys(values).length == 0) {
 		alert("Error: Insert values is empty")
 		return;
 	}
-// console.log("New insert with POST")
-	var sqlpk = {db: dbname, table: table, values: values, funcid: ""}
+
+	if (password == null) password = "";
+	
+	var sqlpk = {db: dbname, table: table, values: values, funcid: "", password: password};
 	
 	xhrSend('api/insertDB', 'sqlpk=' +
 			encodeURIComponent(JSON.stringify(sqlpk)),func, "POST")
@@ -47,7 +49,6 @@ function insertDB(table, values, func) {
 
 function queryDB(qstr, args, limits, func) {
 	
-	console.log("New dbquery")
 	if (args == null) args = {};
 	if (limits == null) limits = {};
 	
@@ -58,7 +59,7 @@ function queryDB(qstr, args, limits, func) {
 }
 
 
-function updateDB(table, values, qstr, args, func) {
+function updateDB(table, values, qstr, args, func, password) {
 	
 	if (values == null || Object.keys(values).length == 0) {
 		alert("Error: Update values is empty")
@@ -66,9 +67,10 @@ function updateDB(table, values, qstr, args, func) {
 	}
 	
 	if (qstr == null) { qstr = "";}
+	if (password == null) password = "";
 	
 	var sqlpk = {db: dbname, table: table, values: values,
-							qstr: qstr, args: args, funcid: ""}
+							qstr: qstr, args: args, funcid: "", password: password}
 	
 	var argstr = 'sqlpk='+ encodeURIComponent(JSON.stringify(sqlpk));
 	
@@ -76,7 +78,7 @@ function updateDB(table, values, qstr, args, func) {
 }
 
 
-function removeDB(table, qstr, args, func) {
+function removeDB(table, qstr, args, func, password) {
 	
 	if (args == null || Object.keys(args).length == 0) {
 		alert("Error: removeDB args is empty")
@@ -84,8 +86,9 @@ function removeDB(table, qstr, args, func) {
 	}
 	
 	if (qstr == null) { qstr = "" }
+	if (password == null) password = "";
 	
-	var sqlpk = {db: dbname, table: table, qstr: qstr, args: args, funcid: ""};
+	var sqlpk = {db: dbname, table: table, qstr: qstr, args: args, funcid: "", password: password};
 	
 	xhrSend('api/removeDB', 'sqlpk='+ 
 			encodeURIComponent(JSON.stringify(sqlpk)),func)
@@ -94,6 +97,12 @@ function removeDB(table, qstr, args, func) {
 
 function getMenu(func) {
 	xhrSend('api/getMenu/-1','',func);
+}
+
+
+function testPassword(passwd, func){
+	xhrSend('api/testPassword/' + passwd + '/-1', "", func);
+	
 }
 
 
@@ -107,7 +116,7 @@ function xhrSend(dbcall, argstr, rtnfunc,httpmethod){
 		var xdbhost = getParam("dbhost");
 		
 		if (xdbhost.length > 0){
-			console.log("Use database host : " + xdbhost);
+//			console.log("Use database host : " + xdbhost);
 			tmpurl = "http://"+xdbhost+"/"+dbcall;
 		} else {
 			tmpurl = "http://testdbhost:8080/"+dbcall;
@@ -125,7 +134,6 @@ function xhrSend(dbcall, argstr, rtnfunc,httpmethod){
 		url: tmpurl,
 		method: httpmethod,
 		data: argstr,
-//		crossDomain: true,
 		dataFilter: function(xrtn){
 //				console.log("In datafileter : " + xrtn);
 				return(JSON.parse(xrtn));
@@ -144,16 +152,15 @@ function getDbName(){
 	var dbnm = "";
 	
 	xpath = xpath.substring(1);
-	console.log("location : "+xpath);
+//	console.log("location : "+xpath);
 	xpath = xpath.split("/")
 	
 	dbnm = (xpath[0].indexOf(SYS_DIR) == 0) ? DB_SYS : DB_USR;
 	xpath = xpath[1].split("#");
 	dbnm = dbnm + xpath[0]
-	
-	console.log("DB name : "+dbnm);
 	return dbnm;
 }
+
 
 
 function getParam(val) {

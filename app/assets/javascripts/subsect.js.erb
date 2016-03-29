@@ -762,14 +762,16 @@ function getdbname(){
 }
 
 
-function insertDB(table, values, func) {
+function insertDB(table, values, func, password) {
 	
 	if (values == null || Object.keys(values).length == 0) {
 		alert("Error: Insert values is empty")
 		return;
 	}
-
-	var sqlpk = {db: dbname, table: table, values: values, funcid: funcID(func)}
+	
+	if (password == null) password = "";
+	
+	var sqlpk = {db: dbname, table: table, values: values, funcid: funcID(func), password: password}
 
 	conn.send(xhrCall('api/insertDB', 'sqlpk='+ 
 			encodeURIComponent(JSON.stringify(sqlpk)), 0, "POST"))
@@ -789,7 +791,7 @@ function queryDB(qstr, args, limits, func) {
 }
 
 
-function updateDB(table, values, qstr, args, func) {
+function updateDB(table, values, qstr, args, func, password) {
 	
 	if (values == null || Object.keys(values).length == 0) {
 		alert("Error: Update values is empty")
@@ -797,16 +799,17 @@ function updateDB(table, values, qstr, args, func) {
 	}
 	
 	if (qstr == null) { qstr = "";}
+	if (password == null) password = "";
 	
 	var sqlpk = {db: dbname, table: table, values: values,
-						qstr: qstr, args: args, funcid: funcID(func)}
+						qstr: qstr, args: args, funcid: funcID(func), password: password}
 
 	conn.send(xhrCall('api/updateDB', 'sqlpk='+ 
 			encodeURIComponent(JSON.stringify(sqlpk)), 0, "POST"))
 }
 
 
-function removeDB(table, qstr, args, func) {
+function removeDB(table, qstr, args, func, passord) {
 	
 	if (args == null || Object.keys(args).length == 0) {
 		alert("Error: removeDB args is empty")
@@ -814,9 +817,10 @@ function removeDB(table, qstr, args, func) {
 	}
 	
 	if (qstr == null) { qstr = ""	}
+	if (password == null) password = "";
 	
 	var sqlpk = {db: dbname, table: table, qstr: qstr,
-						args: args, funcid: funcID(func)}
+						args: args, funcid: funcID(func), passord: password}
 	
 	conn.send(xhrCall('api/removeDB', 'sqlpk='+ 
 			encodeURIComponent(JSON.stringify(sqlpk))))
@@ -826,6 +830,12 @@ function removeDB(table, qstr, args, func) {
 function getMenu(func){
 	
 	conn.send(xhrCall('api/getMenu/'+funcID(func)));
+}
+
+
+function testPassword(passwd, func){
+	conn.send(xhrCall('api/testPassword/' + passwd + '/' + funcID(func)));
+	
 }
 
 
