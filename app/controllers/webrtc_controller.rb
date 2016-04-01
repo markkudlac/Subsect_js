@@ -17,9 +17,9 @@ class WebrtcController < ApplicationController
       appzip = Appzip.where(pkgname: @appName)
     
       if appzip.length > 0 && appzip[0].dbtype == "S_" then
-        @appPath = "sys/" + @appName + "/"
+        @appPath = "sys/" + @appName
       else
-        @appPath = "usr/" + @appName + "/"
+        @appPath = "usr/" + @appName
       end
     end
   end

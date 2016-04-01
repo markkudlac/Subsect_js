@@ -1,4 +1,4 @@
 			
-			initall( '<%= appPath %>',  '<%= appName %>',  '<%= appSubId %>');
+			initall( '<%= appPath %>',  '<%= appSubId %>');
 	
 //			$("#subinitrm").remove();	
