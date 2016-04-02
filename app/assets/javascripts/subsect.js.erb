@@ -220,13 +220,9 @@ Subcon.prototype.peerClientOn = function(subname, peerid, customConfig){
 		this.peer.on('open', function(id) {
 			
 			if (peerid.length <= 0) {
-				var devport=":3000"
-	
-				<% if (Rails.env.production? ) then %>
-					devport = ""
-				<% end %>
-				
-				$.getJSON("http://" +subname+ ".subsect.net"+devport+"/api/getrtcid/"+subname,
+
+	//			$.getJSON("http://" +subname+ ".subsect.net"+devport+"/api/getrtcid/"+subname,
+				$.getJSON("http://" + location.host +"/api/getrtcid/"+subname,
     		function(rtnobj){
     			if (rtnobj.rtn !== false) {
 						if (rtnobj.status == "A") {
