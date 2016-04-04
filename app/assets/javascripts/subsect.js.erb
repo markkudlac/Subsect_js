@@ -126,7 +126,10 @@ var SUB_GLB = {
 	DB_SYS: "S_",
 	DB_USR: "U_",
 	APPURL: "/pkg",
-	LOCALSRC: "localsrc"
+	LOCALSRC: "localsrc",
+	LOCAL: "local",
+	callbackdb: {},
+	callcnt: 0
 };
 
 
@@ -149,13 +152,9 @@ function Subcon(apath){
 	this.subName = null;
 	this.peer = null
 	this.conn = null;
-	this.appFile = null;
 	this.rcvbuffer = {};
 
 	this.filecnt = 0;
-	this.callbackdb = {};
-	this.callcnt = 0;
-	
 	this.loadPath = null;
 }
 
@@ -173,6 +172,13 @@ Subcon.prototype.peerServerOn = function(subname, loadpath) {
 		this.loadPath = this.fullPath(this.appName.toLowerCase()) + ".html"
 	} else {
 		this.loadPath = loadpath;
+	}
+	
+	if (subname == SUB_GLB.LOCAL) {
+		this.peer = Subcon.subrtc.default.peer;
+		this.conn = Subcon.subrtc.default.conn;
+		this.callServer();
+		return;
 	}
 	
 	$.ajax({
@@ -226,7 +232,6 @@ Subcon.prototype.peerClientOn = function(subname, peerid, customConfig){
 
 				var hostarg = location.host.replace(":3030", ":3000");	// for local testing with node server
 				
-	//			$.getJSON("http://" +subname+ ".subsect.net"+devport+"/api/getrtcid/"+subname,
 				$.getJSON("http://" + hostarg +"/api/getrtcid/"+subname,
     		function(rtnobj){
     			if (rtnobj.rtn !== false) {
@@ -291,7 +296,13 @@ Subcon.prototype.callServer = function() {
 	var rcvhtml = null;
 	var headflg = false
 	var self = this;
-		
+	
+	if (this.subName == SUB_GLB.LOCAL){
+  	  console.log("Call for app LOCAL : "+ self.loadPath);
+  		self.conn.send(xhrCall(self.loadPath));
+		return
+	}
+	
 	this.conn.on('open', function() {
 	  // Receive messages
 	  self.conn.on('data', function(data) {
@@ -330,7 +341,7 @@ Subcon.prototype.callServer = function() {
 	  });
 
 	  // Send messages
-	  console.log("Call for app 3 : "+ self.loadPath);
+	  console.log("Call for app : "+ self.loadPath);
 	  self.conn.send(xhrCall(self.loadPath));
 		});
 }	
@@ -348,10 +359,10 @@ Subcon.prototype.processBlob = function(data, xblob){
 		reader.onload = function(){
 		
 			var xread = JSON.parse(reader.result)
-			var tmpfunc = self.callbackdb[xread[0].funcid];
+			var tmpfunc = SUB_GLB.callbackdb[xread[0].funcid];
 			var tmpid = xread[0].funcid
 		
-			delete self.callbackdb.tmpid;
+			delete SUB_GLB.callbackdb.tmpid;
 		
 			if (tmpfunc !== undefined && tmpfunc != null){
 				delete xread[0].funcid;
@@ -447,10 +458,10 @@ Subcon.prototype.processBlob = function(data, xblob){
 		reader.onload = function(){
 
 			var tmpid = xtype.split('/')[1];
-			var tmpfunc = self.callbackdb[tmpid];
+			var tmpfunc = SUB_GLB.callbackdb[tmpid];
 //			console.log("In subfile : "+ tmpid + " tmpfunc : "+tmpfunc);
 			
-			delete self.callbackdb.tmpid;
+			delete SUB_GLB.callbackdb.tmpid;
 		
 			if (tmpfunc !== undefined && tmpfunc != null){
 				setTimeout(tmpfunc, 0, reader.result);
@@ -717,10 +728,10 @@ Subcon.prototype.fullPath = function(locpath){
 
 Subcon.prototype.funcID = function(func){
 	
-	var funcidstr = "f_" + this.callcnt;
+	var funcidstr = "f_" + SUB_GLB.callcnt;
 	
-	++this.callcnt;
-	this.callbackdb[funcidstr] = func;
+	++SUB_GLB.callcnt;
+	SUB_GLB.callbackdb[funcidstr] = func;
 	return(funcidstr);
 }
 
@@ -824,14 +835,12 @@ function getsubFile(xfile, func){
 
 
 function remotecall(subname, path, func, args, rtnval){
-	
 // path like sys/TestSite
-	
-	if (subname == "local") subname = Subcon.subrtc.default.subName;
 
 	var pathary = splitpath(path);
 	var fld = subname+pathary[0]+pathary[1];
 	
+//	console.log("Remote  call fld : " + fld);
 	if (Subcon.subrtc[fld] === undefined ||
 			Subcon.subrtc[fld].api === undefined) {
 		
@@ -847,7 +856,8 @@ function remotecall(subname, path, func, args, rtnval){
 			});
 	
 			Subcon.subrtc[fld] = {};
-			Subcon.subrtc[fld].obj = new Subcon(path, pathary[1]);
+			console.log("Remote before new Subcon");
+			Subcon.subrtc[fld].obj = new Subcon(path);
 			Subcon.subrtc[fld].obj.peerServerOn(subname, path + "/js/api.json");
 		} else {
 			 Subcon.subrtc[fld].api[func](args, rtnval, Subcon.subrtc[fld].obj)
@@ -856,10 +866,7 @@ function remotecall(subname, path, func, args, rtnval){
 
 
 function remoteclose(subname, path){
-	
 // path like sys/TestSite
-	
-	if (subname == "local") subname = Subcon.subrtc.default.subName;
 		
 	if (subname == null || path == null){
 
@@ -874,7 +881,10 @@ function remoteclose(subname, path){
 				
 				if (propValue !== undefined &&
 					propValue.obj !== undefined) {
-					  propValue.obj.peerShutDown();
+	// Using startsWith is bad and should be changed to separate field with _
+					if (! propName.startsWith(SUB_GLB.LOCAL)) {
+					  	propValue.obj.peerShutDown();
+					  }
 					  delete propValue;	
 				}
 			}
@@ -885,7 +895,9 @@ function remoteclose(subname, path){
 	
 		if (Subcon.subrtc[fld] !== undefined &&
 			Subcon.subrtc[fld].obj !== undefined) {
-			  Subcon.subrtc[fld].obj.peerShutDown();
+			if (! propName.startsWith(SUB_GLB.LOCAL)) {
+			  	Subcon.subrtc[fld].obj.peerShutDown();
+			}
 			  delete Subcon.subrtc[fld];	
 		}
 		return true;

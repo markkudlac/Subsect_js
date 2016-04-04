@@ -182,7 +182,7 @@ function remotecall(subname, path, func, args, rtnval){
 			cache: false,
 			dataType: "text",
 			success: function(xrtn){
-				alert("Got JSON 2 : " + xrtn);
+//				alert("Got JSON 2 : " + xrtn);
 				SUB_GLB.subrmt = eval('( ' + xrtn +  ' )');
 			
 				SUB_GLB.subrmt[func](args, rtnval, dbnm);
