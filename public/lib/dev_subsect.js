@@ -168,7 +168,9 @@ function getBaseUrl(){
 
 
 function remotecall(subname, path, func, args, rtnval){
-	
+
+// This is much reduced for testing. Can only connect to local dev phone once.
+		
 	var xpath = splitpath(path);
 	var dbnm = (xpath[0].indexOf(SUB_GLB.SYS_DIR) == 0) ? SUB_GLB.DB_SYS : SUB_GLB.DB_USR;
 		dbnm = dbnm + xpath[1]
@@ -180,7 +182,7 @@ function remotecall(subname, path, func, args, rtnval){
 			cache: false,
 			dataType: "text",
 			success: function(xrtn){
-//				alert("Got JSON 2 : " + xrtn);
+				alert("Got JSON 2 : " + xrtn);
 				SUB_GLB.subrmt = eval('( ' + xrtn +  ' )');
 			
 				SUB_GLB.subrmt[func](args, rtnval, dbnm);

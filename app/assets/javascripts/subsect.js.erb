@@ -146,6 +146,7 @@ function Subcon(apath){
 
 	this.dbname = this.getdbname();
 	
+	this.subName = null;
 	this.peer = null
 	this.conn = null;
 	this.appFile = null;
@@ -165,6 +166,8 @@ Subcon.subrtc = {default : null};
 Subcon.prototype.peerServerOn = function(subname, loadpath) {
 	
 	var self = this;
+	
+	this.subName = subname;
 	
 	if (loadpath == null) {
 		this.loadPath = this.fullPath(this.appName.toLowerCase()) + ".html"
@@ -221,8 +224,10 @@ Subcon.prototype.peerClientOn = function(subname, peerid, customConfig){
 			
 			if (peerid.length <= 0) {
 
+				var hostarg = location.host.replace(":3030", ":3000");	// for local testing with node server
+				
 	//			$.getJSON("http://" +subname+ ".subsect.net"+devport+"/api/getrtcid/"+subname,
-				$.getJSON("http://" + location.host +"/api/getrtcid/"+subname,
+				$.getJSON("http://" + hostarg +"/api/getrtcid/"+subname,
     		function(rtnobj){
     			if (rtnobj.rtn !== false) {
 						if (rtnobj.status == "A") {
@@ -822,6 +827,8 @@ function remotecall(subname, path, func, args, rtnval){
 	
 // path like sys/TestSite
 	
+	if (subname == "local") subname = Subcon.subrtc.default.subName;
+
 	var pathary = splitpath(path);
 	var fld = subname+pathary[0]+pathary[1];
 	
@@ -843,7 +850,6 @@ function remotecall(subname, path, func, args, rtnval){
 			Subcon.subrtc[fld].obj = new Subcon(path, pathary[1]);
 			Subcon.subrtc[fld].obj.peerServerOn(subname, path + "/js/api.json");
 		} else {
-//			console.log("Not event ")
 			 Subcon.subrtc[fld].api[func](args, rtnval, Subcon.subrtc[fld].obj)
 		}
 }
@@ -853,8 +859,26 @@ function remoteclose(subname, path){
 	
 // path like sys/TestSite
 	
+	if (subname == "local") subname = Subcon.subrtc.default.subName;
+		
 	if (subname == null || path == null){
-		return false;
+
+		var propValue;
+		for(var propName in Subcon.subrtc) {
+		    
+			if (!(propName == "default") && 
+				(subname == null || propName.startsWith(subname))) {
+				
+//		    	console.log("Removing remoteclose link : " + propName);
+				propValue = Subcon.subrtc[propName];
+				
+				if (propValue !== undefined &&
+					propValue.obj !== undefined) {
+					  propValue.obj.peerShutDown();
+					  delete propValue;	
+				}
+			}
+		}
 	} else {
 		var pathary = splitpath(path);
 		var fld = subname+pathary[0]+pathary[1];
