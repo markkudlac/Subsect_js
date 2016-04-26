@@ -14,7 +14,7 @@ var SUB_GLB = {
 	useRTC: false
 };
 
- console.log("Using Local 3 dev_subsect");
+// console.log("Using Local 4 dev_subsect");
 
 SUB_GLB.getDbName = function(){
 	
