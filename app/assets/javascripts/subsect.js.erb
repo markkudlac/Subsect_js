@@ -129,7 +129,8 @@ var SUB_GLB = {
 	LOCALSRC: "localsrc",
 	LOCAL: "local",
 	callbackdb: {},
-	callcnt: 0
+	callkey: null,
+	useRTC: true
 };
 
 
@@ -728,9 +729,8 @@ Subcon.prototype.fullPath = function(locpath){
 
 Subcon.prototype.funcID = function(func){
 	
-	var funcidstr = "f_" + SUB_GLB.callcnt;
+	var funcidstr = SUB_GLB.callkey();
 	
-	++SUB_GLB.callcnt;
 	SUB_GLB.callbackdb[funcidstr] = func;
 	return(funcidstr);
 }
@@ -838,7 +838,7 @@ function remotecall(subname, path, func, args, rtnval){
 // path like sys/TestSite
 
 	var pathary = splitpath(path);
-	var fld = subname+pathary[0]+pathary[1];
+	var fld = subname+"_"+pathary[0]+pathary[1];
 	
 //	console.log("Remote  call fld : " + fld);
 	if (Subcon.subrtc[fld] === undefined ||
@@ -856,7 +856,7 @@ function remotecall(subname, path, func, args, rtnval){
 			});
 	
 			Subcon.subrtc[fld] = {};
-			console.log("Remote before new Subcon");
+
 			Subcon.subrtc[fld].obj = new Subcon(path);
 			Subcon.subrtc[fld].obj.peerServerOn(subname, path + "/js/api.json");
 		} else {
@@ -871,35 +871,27 @@ function remoteclose(subname, path){
 	if (subname == null || path == null){
 
 		var propValue;
-		for(var propName in Subcon.subrtc) {
-		    
+		for(var propName in Subcon.subrtc) {	    
 			if (!(propName == "default") && 
-				(subname == null || propName.startsWith(subname))) {
+				(subname == null || propName.startsWith(subname+"_"))) {
 				
 //		    	console.log("Removing remoteclose link : " + propName);
-				propValue = Subcon.subrtc[propName];
-				
-				if (propValue !== undefined &&
-					propValue.obj !== undefined) {
-	// Using startsWith is bad and should be changed to separate field with _
-					if (! propName.startsWith(SUB_GLB.LOCAL)) {
-					  	propValue.obj.peerShutDown();
-					  }
-					  delete propValue;	
+				propValue = Subcon.subrtc[propName];			
+
+				if (! propName.startsWith(SUB_GLB.LOCAL+"_")) {
+				  	propValue.obj.peerShutDown();
 				}
+				delete propValue;	
 			}
 		}
 	} else {
 		var pathary = splitpath(path);
-		var fld = subname+pathary[0]+pathary[1];
+		var fld = subname+"_"+pathary[0]+pathary[1];
 	
-		if (Subcon.subrtc[fld] !== undefined &&
-			Subcon.subrtc[fld].obj !== undefined) {
-			if (! propName.startsWith(SUB_GLB.LOCAL)) {
-			  	Subcon.subrtc[fld].obj.peerShutDown();
-			}
-			  delete Subcon.subrtc[fld];	
+		if (! propName.startsWith(SUB_GLB.LOCAL+"_")) {
+		  	Subcon.subrtc[fld].obj.peerShutDown();
 		}
+		delete Subcon.subrtc[fld];	
 		return true;
 	}	
 }
@@ -945,14 +937,16 @@ function getParam(val) {
 }	
 
 
-
-function subsect_useRTC(){
-	return(true)
-}
-
-
 function splitpath(apath) {
 	apath = apath.trim();
 	if (apath.startsWith("/")) apath = apath.substr(1);
 	return(apath.split("/"));
 }
+
+
+SUB_GLB.callkey = (function () {
+    var dt = new Date();
+	var cnt = 0;
+
+    return function () {return (++cnt).toString() + "F" + (dt.getSeconds() * 1000 + dt.getMilliseconds());}
+})();

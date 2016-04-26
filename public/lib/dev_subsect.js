@@ -10,10 +10,11 @@ var SUB_GLB = {
 	DB_SYS: "S_",
 	DB_USR: "U_",
 	AUD_SRC: "SOURCE",
-	subrmt: null
+	subrmt: {},	//was null
+	useRTC: false
 };
 
-// console.log("Using Local 3 dev_subsect");
+ console.log("Using Local 3 dev_subsect");
 
 SUB_GLB.getDbName = function(){
 	
@@ -172,10 +173,12 @@ function remotecall(subname, path, func, args, rtnval){
 // This is much reduced for testing. Can only connect to local dev phone once.
 		
 	var xpath = splitpath(path);
+	var fld = subname+"_"+xpath[0]+xpath[1];
+	
 	var dbnm = (xpath[0].indexOf(SUB_GLB.SYS_DIR) == 0) ? SUB_GLB.DB_SYS : SUB_GLB.DB_USR;
 		dbnm = dbnm + xpath[1]
 	
-	if (SUB_GLB.subrmt == null){
+	if (SUB_GLB.subrmt[fld] === undefined){
 		$.ajax({	
 			url: "http://"+location.host+"/" + path + "/js/api.json",
 			method: "GET",
@@ -183,9 +186,9 @@ function remotecall(subname, path, func, args, rtnval){
 			dataType: "text",
 			success: function(xrtn){
 //				alert("Got JSON 2 : " + xrtn);
-				SUB_GLB.subrmt = eval('( ' + xrtn +  ' )');
+				SUB_GLB.subrmt[fld] = eval('( ' + xrtn +  ' )');
 			
-				SUB_GLB.subrmt[func](args, rtnval, dbnm);
+				SUB_GLB.subrmt[fld][func](args, rtnval, dbnm);
 			},
 			error: function(xhr,text){
 						alert("XHR Get error : " + text)
@@ -193,14 +196,29 @@ function remotecall(subname, path, func, args, rtnval){
 		});
 	
 	} else {
-		SUB_GLB.subrmt[func](args, rtnval, dbnm);
+		SUB_GLB.subrmt[fld][func](args, rtnval, dbnm);
 	}
 }
 
 
 function remoteclose(subname, path){
+// path like sys/TestSite
 	
-	SUB_GLB.subrmt = null;
+	if (subname == null || path == null){
+
+		for(var propName in SUB_GLB.subrmt) {
+//			console.log("remoteclose 1 : " + propName)	    
+			if (subname == null || propName.startsWith(subname+"_")) {
+				delete SUB_GLB.subrmt[propName];	
+			}
+		}
+	} else {
+		var pathary = splitpath(path);
+		var fld = subname+"_"+pathary[0]+pathary[1];
+//	console.log("Removing remoteclose link 2 : " + fld);
+		delete SUB_GLB.subrmt[fld];	
+		return true;
+	}	
 }
 
 
