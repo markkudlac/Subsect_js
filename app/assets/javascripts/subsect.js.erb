@@ -848,15 +848,12 @@ function remotecall(subname, path, func, args, rtnval){
 		    subpath: fld
 		}, function( event, api ) {
 			$( document ).off( "apiready" );
-		
 			Subcon.subrtc[event.data.subpath].api = api;
-		
-			 Subcon.subrtc[event.data.subpath].api[func](args, rtnval,
-	 			Subcon.subrtc[event.data.subpath].obj);
+			Subcon.subrtc[event.data.subpath].api[func](args, rtnval,
+	 		Subcon.subrtc[event.data.subpath].obj);
 			});
 	
 			Subcon.subrtc[fld] = {};
-
 			Subcon.subrtc[fld].obj = new Subcon(path);
 			Subcon.subrtc[fld].obj.peerServerOn(subname, path + "/js/api.json");
 		} else {
