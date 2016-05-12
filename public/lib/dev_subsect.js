@@ -118,11 +118,16 @@ function getMenu(func) {
 }
 
 
-function testPassword(passwd, func){
-	xhrSend('api/testPassword/' + passwd + '/-1', "", func);
+function testPassword(passwd, token, func){
+	xhrSend('api/testPassword/' + passwd + '/' + (token ? 'T' : 'P') + '/-1', "", func);
 	
 }
 
+
+function getToken(func){
+	xhrSend('api/getToken/-1', "", func);
+	
+}
 
 function xhrSend(dbcall, argstr, rtnfunc,httpmethod){
 	
@@ -243,4 +248,38 @@ function splitpath(apath) {
 	apath = apath.trim();
 	if (apath.startsWith("/")) apath = apath.substr(1);
 	return(apath.split("/"));
+}
+
+
+function setCookie(cname, cvalue, exdays) {
+    var d = new Date();
+    d.setTime(d.getTime() + (exdays*24*60*60*1000));
+    var expires = "expires="+d.toUTCString();
+    document.cookie = cname + "=" + JSON.stringify(cvalue) + "; " + expires + "; path=/; domain=.subsect.net";
+}
+
+
+function getCookie(cname) {
+	
+    var name = cname + "=";
+    var ca = document.cookie.split(';');
+	
+    for(var i = 0; i < ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0) == ' ') {
+            c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+            return JSON.parse(c.substring(name.length, c.length));
+        }
+    }
+    return {};
+}
+
+
+function deleteCookie(cname) {
+	
+	var xdel = cname+"=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=.subsect.net";
+	console.log("Deleting cookie : " + xdel)
+	document.cookie = xdel;
 }

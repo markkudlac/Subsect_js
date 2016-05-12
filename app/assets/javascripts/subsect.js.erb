@@ -821,10 +821,16 @@ function getMenu(func){
 }
 
 
-function testPassword(passwd, func){
-	Subcon.subrtc.default.conn.send(xhrCall('api/testPassword/' + passwd + '/' + 
+function testPassword(passwd, token, func){
+	Subcon.subrtc.default.conn.send(xhrCall('api/testPassword/'+ passwd + '/' + (token ? 'T' : 'P') + '/' + 
 			Subcon.subrtc.default.funcID(func)));
 	
+}
+
+
+function getToken(func){
+	
+	Subcon.subrtc.default.conn.send(xhrCall('api/getToken/' + Subcon.subrtc.default.funcID(func)));
 }
 
 
@@ -947,3 +953,37 @@ SUB_GLB.callkey = (function () {
 
     return function () {return (++cnt).toString() + "F" + (dt.getSeconds() * 1000 + dt.getMilliseconds());}
 })();
+
+
+function setCookie(cname, cvalue, exdays) {
+    var d = new Date();
+    d.setTime(d.getTime() + (exdays*24*60*60*1000));
+    var expires = "expires="+d.toUTCString();
+    document.cookie = cname + "=" + JSON.stringify(cvalue) + "; " + expires + "; path=/; domain=.subsect.net";
+}
+
+
+function getCookie(cname) {
+	
+    var name = cname + "=";
+    var ca = document.cookie.split(';');
+	
+    for(var i = 0; i < ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0) == ' ') {
+            c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+            return JSON.parse(c.substring(name.length, c.length));
+        }
+    }
+    return {};
+}
+
+
+function deleteCookie(cname) {
+	
+	var xdel = cname+"=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=.subsect.net";
+	console.log("Deleting cookie : " + xdel)
+	document.cookie = xdel;
+}
