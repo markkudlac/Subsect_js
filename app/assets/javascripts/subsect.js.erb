@@ -830,7 +830,9 @@ function testPassword(passwd, token, func){
 
 function getToken(func){
 	
-	Subcon.subrtc.default.conn.send(xhrCall('api/getToken/' + Subcon.subrtc.default.funcID(func)));
+//	Subcon.subrtc.default.conn.send(xhrCall('api/getToken/' + Subcon.subrtc.default.funcID(func)));
+	
+	subrtc.conn.send(xhrCall('api/getToken/' + subrtc.funcID(func)));
 }
 
 
