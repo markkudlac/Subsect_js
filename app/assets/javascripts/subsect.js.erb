@@ -821,18 +821,21 @@ function getMenu(func){
 }
 
 
-function testPassword(passwd, token, func){
-	Subcon.subrtc.default.conn.send(xhrCall('api/testPassword/'+ passwd + '/' + (token ? 'T' : 'P') + '/' + 
-			Subcon.subrtc.default.funcID(func)));
+function testPassword(passwd, tokenflg, func, subrtc){
+	
+	if (subrtc == null) subrtc = Subcon.subrtc.default;
+	
+	subrtc.conn.send(xhrCall('api/testPassword/'+ passwd + '/' + (tokenflg ? 'T' : 'P') + '/' + 
+			subrtc.funcID(func)));
 	
 }
 
 
-function getToken(func, subrtc){
+function getToken(func){
 	
-//	Subcon.subrtc.default.conn.send(xhrCall('api/getToken/' + Subcon.subrtc.default.funcID(func)));
+	Subcon.subrtc.default.conn.send(xhrCall('api/getToken/' + Subcon.subrtc.default.funcID(func)));
 	
-	subrtc.conn.send(xhrCall('api/getToken/' + subrtc.funcID(func)));
+	//subrtc.conn.send(xhrCall('api/getToken/' + subrtc.funcID(func)));
 }
 
 

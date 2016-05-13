@@ -118,8 +118,8 @@ function getMenu(func) {
 }
 
 
-function testPassword(passwd, token, func){
-	xhrSend('api/testPassword/' + passwd + '/' + (token ? 'T' : 'P') + '/-1', "", func);
+function testPassword(passwd, tokenflg, func){
+	xhrSend('api/testPassword/' + passwd + '/' + (tokenflg ? 'T' : 'P') + '/-1', "", func);
 	
 }
 
