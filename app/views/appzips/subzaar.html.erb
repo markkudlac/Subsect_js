@@ -38,9 +38,9 @@
 
 function runinstall(id, filesize, title){
 	if (typeof android === "undefined" || typeof android.install !== "function") {
-		sb_alert("Can install only from phone");
+		alertmodal("Can install only from phone");
 	} else {
-		sb_alert("Continue to install : " + title, function(){
+		alertmodal("Continue to install : " + title, function(){
 			$("#progmess").text("Begin Download")
 			android.install(id, filesize);
 		});
