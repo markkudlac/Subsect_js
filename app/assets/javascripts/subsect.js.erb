@@ -127,15 +127,16 @@ var SUB_GLB = {
 	DB_USR: "U_",
 	APPURL: "/pkg",
 	LOCALSRC: "localsrc",
-	LOCAL: "local",
+	LOCAL: "L$_",
 	callbackdb: {},
 	callkey: null,
-	useRTC: true
+	useRTC: true,
+	subdomain: ""
 };
 
 
 function initall(apath, subname){
-	
+	SUB_GLB.subdomain = subname;
 	Subcon.subrtc.default = new Subcon(apath);
 	Subcon.subrtc.default.peerServerOn(subname);
 }
@@ -411,15 +412,16 @@ Subcon.prototype.processBlob = function(data, xblob){
 					
 				} else if (xblob.type.indexOf("json") > 0) {
 					var xres = reader.result;
+				 	var apisubname;
 					
-					 var api = eval( '( ' + xres + ' )' );
-				 	var pathary = splitpath(data.uri);
-				 	var fld = "local"+"_"+pathary[0]+pathary[1];
+					if (self.subName == SUB_GLB.subdomain) {
+						apisubname = SUB_GLB.LOCAL;
+					} else {
+						apisubname = self.subName;
+					}
 					
-					console.log("before eval api subname : " + self.subName)
-					console.log("before eval api fld : " + fld)
-					
-					 $( document ).trigger( "api" + fld, [ api ] );				 
+					var fld = remoteKey(apisubname, data.uri);
+					 $( document ).trigger( "api" + fld, [ eval( '( ' + xres + ' )' ) ] );				 
 				}
 	    	};
 		
@@ -842,44 +844,14 @@ function getsubFile(xfile, func){
 			"subfile/" + Subcon.subrtc.default.funcID(func)));
 }
 
-/*
-function remotecall(subname, path, func, args, rtnval){
-// path like sys/TestSite
-
-	var pathary = splitpath(path);
-	var fld = subname+"_"+pathary[0]+pathary[1];
-	
-	console.log("Remote  call fld : " + fld);
-	if (Subcon.subrtc[fld] === undefined ||
-			Subcon.subrtc[fld].api === undefined) {
-		
-		$( document ).on( "apiready", {
-		    subpath: fld
-		}, function( event, api ) {
-			$( document ).off( "apiready" );
-			console.log("apiready fired : " + event.data.subpath + "  func : " + func);
-			console.log("apiready funcbody : " + api + "  func caller : " + api[func]);
-			Subcon.subrtc[event.data.subpath].api = api;
-			Subcon.subrtc[event.data.subpath].api[func](args, rtnval,
-	 		Subcon.subrtc[event.data.subpath].obj);
-			});
-	
-			Subcon.subrtc[fld] = {};
-			Subcon.subrtc[fld].obj = new Subcon(path);
-			Subcon.subrtc[fld].obj.peerServerOn(subname, path + "/js/api.json");
-		} else {
-			console.log("API is loaded and defined : " + fld)
-			 Subcon.subrtc[fld].api[func](args, rtnval, Subcon.subrtc[fld].obj)
-		}
-}
-*/
 
 
 function remotecall(subname, path, func, args, rtnval){
 // path like sys/TestSite
 
-	var pathary = splitpath(path);
-	var fld = subname+"_"+pathary[0]+pathary[1];
+	if (subname === null || subname.length == 0) subname = SUB_GLB.LOCAL;
+	
+	var fld = remoteKey(subname, path);
 	
 	console.log("Remote  call fld : " + fld);
 	if (Subcon.subrtc[fld] === undefined ||
@@ -888,7 +860,7 @@ function remotecall(subname, path, func, args, rtnval){
 		$( document ).on( "api" + fld, {
 		    subpath: fld
 		}, function( event, api ) {
-			$( document ).off( "api"+fld );
+			$( document ).off(event.type);
 			console.log("apiready fired type : " + event.type);
 			console.log("apiready fired : " + event.data.subpath + "  func : " + func);
 		//	console.log("apiready funcbody : " + api + "  func caller : " + api[func]);
@@ -907,31 +879,36 @@ function remotecall(subname, path, func, args, rtnval){
 }
 
 
+function remoteKey(subname, xpath){
+
+ 	var pathary = splitpath(xpath);
+ 	return(subname+"_"+pathary[0]+pathary[1]);
+}
+
 
 function remoteclose(subname, path){
 // path like sys/TestSite
 		
-	if (subname == null || path == null){
+	if (subname === null || path === null){
 
 		var propValue;
 		for(var propName in Subcon.subrtc) {	    
 			if (!(propName == "default") && 
-				(subname == null || propName.startsWith(subname+"_"))) {
+				(subname === null || propName.startsWith(subname+"_"))) {
 				
 //		    	console.log("Removing remoteclose link : " + propName);
 				propValue = Subcon.subrtc[propName];			
 
-				if (! propName.startsWith(SUB_GLB.LOCAL+"_")) {
+				if (! propName.startsWith(SUB_GLB.LOCAL)) {
 				  	propValue.obj.peerShutDown();
 				}
 				delete propValue;	
 			}
 		}
 	} else {
-		var pathary = splitpath(path);
-		var fld = subname+"_"+pathary[0]+pathary[1];
+		var fld = remoteKey(subname, path);
 	
-		if (! fld.startsWith(SUB_GLB.LOCAL+"_")) {
+		if (! fld.startsWith(SUB_GLB.LOCAL)) {
 		  	Subcon.subrtc[fld].obj.peerShutDown();
 		}
 		delete Subcon.subrtc[fld];	

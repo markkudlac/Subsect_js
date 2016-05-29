@@ -54,6 +54,7 @@ var SUB_GLB = {
 	DB_SYS: "S_",
 	DB_USR: "U_",
 	AUD_SRC: "SOURCE",
+	LOCAL: "L$_",
 	subrmt: {},	//was null
 	useRTC: false
 };
@@ -220,9 +221,8 @@ function getBaseUrl(){
 function remotecall(subname, path, func, args, rtnval){
 
 // This is much reduced for testing. Can only connect to local dev phone once.
-		
-	var xpath = splitpath(path);
-	var fld = subname+"_"+xpath[0]+xpath[1];
+	if (subname === null || subname.length == 0) subname = SUB_GLB.LOCAL;
+	var fld = remoteKey(subname, path);
 	
 	var dbnm = (xpath[0].indexOf(SUB_GLB.SYS_DIR) == 0) ? SUB_GLB.DB_SYS : SUB_GLB.DB_USR;
 		dbnm = dbnm + xpath[1]
@@ -262,13 +262,19 @@ function remoteclose(subname, path){
 			}
 		}
 	} else {
-		var pathary = splitpath(path);
-		var fld = subname+"_"+pathary[0]+pathary[1];
+		var fld = remoteKey(subname, path);
 //	console.log("Removing remoteclose link 2 : " + fld);
 		delete SUB_GLB.subrmt[fld];	
 		return true;
 	}	
 }
+
+function remoteKey(subname, xpath){
+
+ 	var pathary = splitpath(xpath);
+ 	return(subname+"_"+pathary[0]+pathary[1]);
+}
+
 
 
 function getParam(val) {
