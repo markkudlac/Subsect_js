@@ -167,7 +167,7 @@ Subcon.prototype.peerServerOn = function(subname, loadpath) {
 	
 	var self = this;
 	
-	this.subName = subname;
+	self.subName = subname;
 	
 	if (loadpath == null) {
 		this.loadPath = this.fullPath(this.appName.toLowerCase()) + ".html"
@@ -192,14 +192,6 @@ Subcon.prototype.peerServerOn = function(subname, loadpath) {
 	    domain: "subsect.net",
 	    application: "subserver",
 	    room: "default",
-	
-	    /*
-	    ident: "rosemaryp",
-	    secret: "ddb1722f-43ca-4a52-9eed-449875634cc9",
-	    domain: "www.adladl.com",
-	    application: "subserv",
-	    room: "room-1",
-			*/
 	    secure: 1,
 		timeout: 600
 	  },
@@ -349,7 +341,7 @@ Subcon.prototype.callServer = function() {
 
 	
 Subcon.prototype.processBlob = function(data, xblob){
-	//console.log("processBlob all uri : " + data.uri + "  Type : "+ xblob.type);
+//	console.log("processBlob all uri : " + data.uri + "  Type : "+ xblob.type);
 	
 	var self = this;
 	
@@ -421,7 +413,13 @@ Subcon.prototype.processBlob = function(data, xblob){
 					var xres = reader.result;
 					
 					 var api = eval( '( ' + xres + ' )' );
-					 $( document ).trigger( "apiready", [ api ] );				 
+				 	var pathary = splitpath(data.uri);
+				 	var fld = "local"+"_"+pathary[0]+pathary[1];
+					
+					console.log("before eval api subname : " + self.subName)
+					console.log("before eval api fld : " + fld)
+					
+					 $( document ).trigger( "api" + fld, [ api ] );				 
 				}
 	    	};
 		
@@ -844,14 +842,14 @@ function getsubFile(xfile, func){
 			"subfile/" + Subcon.subrtc.default.funcID(func)));
 }
 
-
+/*
 function remotecall(subname, path, func, args, rtnval){
 // path like sys/TestSite
 
 	var pathary = splitpath(path);
 	var fld = subname+"_"+pathary[0]+pathary[1];
 	
-//	console.log("Remote  call fld : " + fld);
+	console.log("Remote  call fld : " + fld);
 	if (Subcon.subrtc[fld] === undefined ||
 			Subcon.subrtc[fld].api === undefined) {
 		
@@ -859,6 +857,8 @@ function remotecall(subname, path, func, args, rtnval){
 		    subpath: fld
 		}, function( event, api ) {
 			$( document ).off( "apiready" );
+			console.log("apiready fired : " + event.data.subpath + "  func : " + func);
+			console.log("apiready funcbody : " + api + "  func caller : " + api[func]);
 			Subcon.subrtc[event.data.subpath].api = api;
 			Subcon.subrtc[event.data.subpath].api[func](args, rtnval,
 	 		Subcon.subrtc[event.data.subpath].obj);
@@ -868,9 +868,44 @@ function remotecall(subname, path, func, args, rtnval){
 			Subcon.subrtc[fld].obj = new Subcon(path);
 			Subcon.subrtc[fld].obj.peerServerOn(subname, path + "/js/api.json");
 		} else {
+			console.log("API is loaded and defined : " + fld)
 			 Subcon.subrtc[fld].api[func](args, rtnval, Subcon.subrtc[fld].obj)
 		}
 }
+*/
+
+
+function remotecall(subname, path, func, args, rtnval){
+// path like sys/TestSite
+
+	var pathary = splitpath(path);
+	var fld = subname+"_"+pathary[0]+pathary[1];
+	
+	console.log("Remote  call fld : " + fld);
+	if (Subcon.subrtc[fld] === undefined ||
+			Subcon.subrtc[fld].api === undefined) {
+		
+		$( document ).on( "api" + fld, {
+		    subpath: fld
+		}, function( event, api ) {
+			$( document ).off( "api"+fld );
+			console.log("apiready fired type : " + event.type);
+			console.log("apiready fired : " + event.data.subpath + "  func : " + func);
+		//	console.log("apiready funcbody : " + api + "  func caller : " + api[func]);
+			Subcon.subrtc[event.data.subpath].api = api;
+			Subcon.subrtc[event.data.subpath].api[func](args, rtnval,
+	 		Subcon.subrtc[event.data.subpath].obj);
+			});
+	
+		Subcon.subrtc[fld] = {};
+		Subcon.subrtc[fld].obj = new Subcon(path);
+		Subcon.subrtc[fld].obj.peerServerOn(subname, path + "/js/api.json");
+	} else {
+		console.log("API is loaded and defined : " + fld)
+		 Subcon.subrtc[fld].api[func](args, rtnval, Subcon.subrtc[fld].obj)
+	}
+}
+
 
 
 function remoteclose(subname, path){
