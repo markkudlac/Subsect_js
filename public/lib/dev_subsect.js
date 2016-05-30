@@ -222,12 +222,15 @@ function remotecall(subname, path, func, args, rtnval){
 
 // This is much reduced for testing. Can only connect to local dev phone once.
 	if (subname === null || subname.length == 0) subname = SUB_GLB.LOCAL;
+	
+	var xpath = splitpath(path);
 	var fld = remoteKey(subname, path);
 	
 	var dbnm = (xpath[0].indexOf(SUB_GLB.SYS_DIR) == 0) ? SUB_GLB.DB_SYS : SUB_GLB.DB_USR;
 		dbnm = dbnm + xpath[1]
 	
 	if (SUB_GLB.subrmt[fld] === undefined){
+		console.log("fld maybe remote: " + fld)
 		$.ajax({	
 			url: "http://"+location.host+"/" + path + "/js/api.json",
 			method: "GET",

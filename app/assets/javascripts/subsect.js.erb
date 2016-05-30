@@ -853,7 +853,7 @@ function remotecall(subname, path, func, args, rtnval){
 	
 	var fld = remoteKey(subname, path);
 	
-	console.log("Remote  call fld : " + fld);
+//	console.log("Remote  call fld : " + fld);
 	if (Subcon.subrtc[fld] === undefined ||
 			Subcon.subrtc[fld].api === undefined) {
 		
@@ -861,9 +861,8 @@ function remotecall(subname, path, func, args, rtnval){
 		    subpath: fld
 		}, function( event, api ) {
 			$( document ).off(event.type);
-			console.log("apiready fired type : " + event.type);
-			console.log("apiready fired : " + event.data.subpath + "  func : " + func);
-		//	console.log("apiready funcbody : " + api + "  func caller : " + api[func]);
+//			console.log("apiready fired type : " + event.type);
+//			console.log("apiready fired : " + event.data.subpath + "  func : " + func);
 			Subcon.subrtc[event.data.subpath].api = api;
 			Subcon.subrtc[event.data.subpath].api[func](args, rtnval,
 	 		Subcon.subrtc[event.data.subpath].obj);
@@ -873,7 +872,6 @@ function remotecall(subname, path, func, args, rtnval){
 		Subcon.subrtc[fld].obj = new Subcon(path);
 		Subcon.subrtc[fld].obj.peerServerOn(subname, path + "/js/api.json");
 	} else {
-		console.log("API is loaded and defined : " + fld)
 		 Subcon.subrtc[fld].api[func](args, rtnval, Subcon.subrtc[fld].obj)
 	}
 }
