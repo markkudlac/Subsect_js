@@ -127,7 +127,7 @@ var SUB_GLB = {
 	DB_USR: "U_",
 	APPURL: "/pkg",
 	LOCALSRC: "localsrc",
-	LOCAL: "L$_",
+//	LOCAL: "L$_",
 	callbackdb: {},
 	callkey: null,
 	useRTC: true,
@@ -136,7 +136,7 @@ var SUB_GLB = {
 
 
 function initall(apath, subname){
-	SUB_GLB.subdomain = subname;
+	SUB_GLB.subdomain = subname+"_init";
 	Subcon.subrtc.default = new Subcon(apath);
 	Subcon.subrtc.default.peerServerOn(subname);
 }
@@ -176,7 +176,7 @@ Subcon.prototype.peerServerOn = function(subname, loadpath) {
 		this.loadPath = loadpath;
 	}
 	
-	if (subname == SUB_GLB.LOCAL) {
+	if (subname == SUB_GLB.subdomain) {
 		this.peer = Subcon.subrtc.default.peer;
 		this.conn = Subcon.subrtc.default.conn;
 		this.callServer();
@@ -291,10 +291,12 @@ Subcon.prototype.callServer = function() {
 	var headflg = false
 	var self = this;
 	
-	if (this.subName == SUB_GLB.LOCAL){
+	if (self.subName == SUB_GLB.subdomain){		// This maynot be right
   	  console.log("Call for app LOCAL : "+ self.loadPath);
   		self.conn.send(xhrCall(self.loadPath));
 		return
+	} else if (self.subName + "_init" == SUB_GLB.subdomain){
+		SUB_GLB.subdomain = self.subName ;
 	}
 	
 	this.conn.on('open', function() {
@@ -412,15 +414,11 @@ Subcon.prototype.processBlob = function(data, xblob){
 					
 				} else if (xblob.type.indexOf("json") > 0) {
 					var xres = reader.result;
-				 	var apisubname;
+				 	var apisubname = "";
 					
-					if (self.subName == SUB_GLB.subdomain) {
-						apisubname = SUB_GLB.LOCAL;
-					} else {
-						apisubname = self.subName;
-					}
-					
-					var fld = remoteKey(apisubname, data.uri);
+//	console.log("Before eval subName : " + self.subName + "  apisubname : " + apisubname)				
+					var fld = remoteKey(self.subName, data.uri);
+//	console.log("Before eval fld : " + fld); 
 					 $( document ).trigger( "api" + fld, [ eval( '( ' + xres + ' )' ) ] );				 
 				}
 	    	};
@@ -849,11 +847,11 @@ function getsubFile(xfile, func){
 function remotecall(subname, path, func, args, rtnval){
 // path like sys/TestSite
 
-	if (subname === null || subname.length == 0) subname = SUB_GLB.LOCAL;
+	if (subname === null || subname.length == 0) subname = SUB_GLB.subdomain;
 	
 	var fld = remoteKey(subname, path);
 	
-//	console.log("Remote  call fld : " + fld);
+	console.log("Remote  call fld : " + fld + "  func : " + func);
 	if (Subcon.subrtc[fld] === undefined ||
 			Subcon.subrtc[fld].api === undefined) {
 		
@@ -872,6 +870,7 @@ function remotecall(subname, path, func, args, rtnval){
 		Subcon.subrtc[fld].obj = new Subcon(path);
 		Subcon.subrtc[fld].obj.peerServerOn(subname, path + "/js/api.json");
 	} else {
+//		console.log("apiloaded : " + fld + "  func : " + func);
 		 Subcon.subrtc[fld].api[func](args, rtnval, Subcon.subrtc[fld].obj)
 	}
 }
@@ -897,7 +896,7 @@ function remoteclose(subname, path){
 //		    	console.log("Removing remoteclose link : " + propName);
 				propValue = Subcon.subrtc[propName];			
 
-				if (! propName.startsWith(SUB_GLB.LOCAL)) {
+				if (! propName.startsWith(SUB_GLB.subdomain+"_")) {
 				  	propValue.obj.peerShutDown();
 				}
 				delete propValue;	
@@ -906,7 +905,7 @@ function remoteclose(subname, path){
 	} else {
 		var fld = remoteKey(subname, path);
 	
-		if (! fld.startsWith(SUB_GLB.LOCAL)) {
+		if (! fld.startsWith(SUB_GLB.subdomain+"_")) {
 		  	Subcon.subrtc[fld].obj.peerShutDown();
 		}
 		delete Subcon.subrtc[fld];	
