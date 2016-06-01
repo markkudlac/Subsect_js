@@ -24,7 +24,7 @@
         <td onclick="runinstall(<%= appzip.id %>, <%= appzip.zipfile.bytesize %>,
 					'<%= appzip.title %>')">
 					<img id="icon" style="height: 50px; width: 50px" 
-						src="data:image/gif;base64,<%= appzip.icon %>"></td>
+						src="<%= appzip.icon %>"></td>
 				<td><span id="progmess"></span><br>
 				<span id="progper"></span></td>
       </tr>
