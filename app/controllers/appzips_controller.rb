@@ -57,7 +57,6 @@ class AppzipsController < ApplicationController
      
      upload = appzip_params[:icon]
      if !upload.nil? then
-       puts "Icon path : " + upload.content_type
        newparams[:icon] = "data:" + upload.content_type + ";base64," +Base64.encode64(File.read(upload.path))
      end
      

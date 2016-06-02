@@ -232,7 +232,9 @@ function remotecall(subname, path, func, args, rtnval){
 		dbnm = dbnm + xpath[1]
 
 	if (SUB_GLB.subrmt[fld] === undefined){
-		console.log("fld maybe remote : " + fld + " : " + func);
+		console.log("fld maybe remote set null: " + fld + " : " + func);
+		SUB_GLB.subrmt[fld] = null;
+		
 		$.ajax({	
 			url: "http://"+xhost+"/" + path + "/js/api.json",
 			method: "GET",
@@ -248,7 +250,10 @@ function remotecall(subname, path, func, args, rtnval){
 						alert("XHR Get error : " + text)
 				}
 		});
-	
+	} else if (SUB_GLB.subrmt[fld] === null){
+//		console.log("calling on null wait");
+// This is here so we do not get multiple remote objects
+		setTimeout(remotecall, 1000, subname, path, func, args, rtnval);
 	} else {
 		SUB_GLB.subrmt[fld][func](args, rtnval, dbnm);
 	}
