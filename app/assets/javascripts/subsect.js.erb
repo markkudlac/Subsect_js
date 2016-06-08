@@ -127,8 +127,8 @@ var SUB_GLB = {
 	DB_USR: "U_",
 	APPURL: "/pkg",
 	LOCALSRC: "localsrc",
-//	LOCAL: "L$_",
 	callbackdb: {},
+	rcvbuffer : {},
 	callkey: null,
 	useRTC: true,
 	subdomain: ""
@@ -148,13 +148,11 @@ function Subcon(apath){
 	
 	this.appPath = pathary[0] + "/" + pathary[1];
 	this.appName = pathary[1];
-
 	this.dbname = this.getdbname();
 	
 	this.subName = null;
 	this.peer = null
 	this.conn = null;
-	this.rcvbuffer = {};
 
 	this.filecnt = 0;
 	this.loadPath = null;
@@ -163,14 +161,13 @@ function Subcon(apath){
 
 Subcon.subrtc = {default : null};
 
-
 Subcon.prototype.peerServerOn = function(subname, loadpath) {
 	
 	var self = this;
 	
 	self.subName = subname;
 	
-	if (loadpath == null) {
+	if (!loadpath) {
 		this.loadPath = this.fullPath(this.appName.toLowerCase()) + ".html"
 	} else {
 		this.loadPath = loadpath;
@@ -299,35 +296,40 @@ Subcon.prototype.callServer = function() {
 		SUB_GLB.subdomain = self.subName ;
 	}
 	
-	this.conn.on('open', function() {
+	self.conn.on('open', function() {
 	  // Receive messages
 	  self.conn.on('data', function(data) {
 			
 			var xblob;
-
+//console.log("conn.on get blobs cnt : " + data.cnt + "  data.rcvkey : " + data.rcvkey + "  data.uri : " + data.uri)
 			if (data.cnt == 0){
+				
 				xblob = new Blob([ new Uint8Array(data.blob) ], {type : data.blobtype});
 			} else {
 				if (data.cnt == 1) {
-					self.rcvbuffer[data.uri] = {type: data.blobtype, block: []};
+				//	if (data.blobtype.indexOf("audio") == 0) data.rcvkey = data.uri;
+					SUB_GLB.rcvbuffer[data.rcvkey] = {type: data.blobtype, block: []};
 				}
-				self.rcvbuffer[data.uri].block[data.cnt -  1] = new Uint8Array(data.blob);
+				
+				if (data.cnt > 0){
+					SUB_GLB.rcvbuffer[data.rcvkey].block[data.cnt -  1] = new Uint8Array(data.blob);
+				}
 				
 				if (data.cnt == -1) {
-					buflen = self.rcvbuffer[data.uri].block.length;  //add last block in
-					self.rcvbuffer[data.uri].block[buflen] = new Uint8Array(data.blob);
+					buflen = SUB_GLB.rcvbuffer[data.rcvkey].block.length;  //add last block in
+					SUB_GLB.rcvbuffer[data.rcvkey].block[buflen] = new Uint8Array(data.blob);
 					
-					xblob = new Blob(self.rcvbuffer[data.uri].block, {type : data.blobtype});
-			console.log("In data last block : " + data.cnt + "  blobsize : " +
-					self.rcvbuffer[data.uri].block[0].length + " uri  " + data.uri);
+					xblob = new Blob(SUB_GLB.rcvbuffer[data.rcvkey].block, {type : data.blobtype});
+	//		console.log("In data last block : " + data.cnt + "  blobsize : " +
+	//				SUB_GLB.rcvbuffer[data.rcvkey].block[0].length + " rcvkey  " + data.rcvkey);
 				} else {
-					console.log("In data loop : " + data.cnt + "  blobsize : " +
-							self.rcvbuffer[data.uri].block[0].length);
+	//			console.log("In data loop : " + data.cnt + "  blobsize : " +
+	//						SUB_GLB.rcvbuffer[data.rcvkey].block[0].length);
 							
-					self.conn.send(xhrCall(data.uri, null, data.cnt));
+					self.conn.send(xhrCall(data.uri, null, data.cnt, data.rcvkey));
 					
 					if (data.blobtype.indexOf("audio") == 0) {
-						self.driveStream()
+						driveStream(data.rcvkey);
 					}
 					return
 				}
@@ -447,15 +449,13 @@ Subcon.prototype.processBlob = function(data, xblob){
 	} else if (xblob.type.indexOf("audio") == 0) {
 			//Audio
 //		console.log("Audio blob size : " + xblob.size + "  Type : "+xblob.type);
-	
-		this.endStream(data.uri);
+		endStream(data.uri, data.rcvkey);
 	} else if (xblob.type.indexOf("subfile") == 0){
 		
 		var reader = new FileReader();
 		var xtype = xblob.type;
 		
 		reader.onload = function(){
-
 			var tmpid = xtype.split('/')[1];
 			var tmpfunc = SUB_GLB.callbackdb[tmpid];
 //			console.log("In subfile : "+ tmpid + " tmpfunc : "+tmpfunc);
@@ -466,17 +466,14 @@ Subcon.prototype.processBlob = function(data, xblob){
 				setTimeout(tmpfunc, 0, reader.result);
 			}
 		}
-	
 		reader.readAsText(xblob);
 	}
-	
-	this.clearRcvBuffer(data.uri);
+	clearRcvBuffer(data.rcvkey);
 }
 	
 	
 Subcon.prototype.processHead = function(rcvhtml){
 		
-
 /* This is a hack to force remote calls to behave syncronously
 	This should be looked at later. requires all sync remote calls to be at
 	the beginning of the <head>
@@ -509,7 +506,7 @@ var self = this;
 							mimetp = "text/ng-template";
 					 }
 
-					 self.conn.send(xhrCall(self.fullPath(this_src),null,null,null,mimetp));
+					 self.conn.send(xhrCall(self.fullPath(this_src),null,null,null,null,mimetp));
 				 } else {
 					 $.holdReady( true );
 	//				 console.log("remote before javscript send : " + this.src +
@@ -598,12 +595,11 @@ Subcon.prototype.fetchimgsrc = function(){
  })
 }
 
-
-
 	
 Subcon.prototype.loadhead = function(filecnt, rcvhtml) {
 	var tmp = [];
 	var i = 0;
+	
 	if (this.filecnt == 0) {
 		// This cleans up the spinner etc may not be best
 		
@@ -622,115 +618,102 @@ Subcon.prototype.loadhead = function(filecnt, rcvhtml) {
 }
 	
 
-Subcon.prototype.driveStream = function() {
+Subcon.prototype.getdbname = function(){	
+	var xname = this.appPath.indexOf(SUB_GLB.SYS_DIR) == 0  ? SUB_GLB.DB_SYS : SUB_GLB.DB_USR;
+	return (xname + this.appName);
+}
+
+
+Subcon.prototype.fullPath = function(locpath){	
+	return(this.appPath + "/" + locpath);
+}
+
+
+function funcID(func){
+	var funcidstr = SUB_GLB.callkey();
 	
-	var self = this;
+	SUB_GLB.callbackdb[funcidstr] = func;
+	return(funcidstr);
+}
+
+
+function driveStream(rcvkey) {
 	
  $.each($('source').get(), function(){
-	  console.log("DriveStream tag: " + this.src + "  data : "+ $.data(this, SUB_GLB.LOCALSRC))
+//	  console.log("DriveStream tag: " + this.src + "  data : "+ $.data(this, SUB_GLB.LOCALSRC))
 	 if (! this.hasAttribute("src") && $.data(this, SUB_GLB.LOCALSRC) !== undefined &&
- 					self.bufferStart($.data(this, SUB_GLB.LOCALSRC))) {
-						
-						this.parentNode.removeEventListener("ended", self.streamEnd);
-						self.playstream(this, $.data(this, SUB_GLB.LOCALSRC))
-						this.parentNode.addEventListener("ended", self.streamEnd);
+			bufferStart(rcvkey)) {
+				this.rcvkey = rcvkey;
+				this.parentNode.removeEventListener("ended", streamEnd);
+				playstream(this, rcvkey);
+				this.parentNode.addEventListener("ended", streamEnd, false);
 	 }
  })
 }
 
 
-Subcon.prototype.clearRcvBuffer = function(bkey){
-	this.rcvbuffer[bkey] = null;
+function playstream(el, buffkey) {
+	var timespot;
+	var url = window.URL || window.webkitURL;
+	var timedelay = 1000;
+	var audurl;
+
+	el.parentNode.pause();
+	timespot = el.parentNode.currentTime;
+
+	if (el.src !== undefined && el.src.length > 0) {
+		url.revokeObjectURL(el.src);
+	} else {
+		timedelay = 0;
+	}
+	
+	audurl = url.createObjectURL(new Blob(SUB_GLB.rcvbuffer[buffkey].block,
+								 	{type : SUB_GLB.rcvbuffer[buffkey].type}));
+	el.src=audurl;
+
+	setTimeout(function(){
+	el.parentNode.load();
+	el.parentNode.currentTime = timespot;
+	el.parentNode.play();	
+	}, timedelay)
 }
 
 
-Subcon.prototype.bufferStart = function(buffkey) {
-	
-	var xblock = this.rcvbuffer[buffkey].block;
+
+function streamEnd(){
+	$.each($(this).children('source'), function(){
+		if ($.data(this, SUB_GLB.LOCALSRC) !== undefined){
+			playstream(this, this.rcvkey);
+		}
+	})
+}
+
+
+function endStream(file, rcvkey) {
+ 	$.each($('source').get(), function(){
+	 	if ($.data(this, SUB_GLB.LOCALSRC) !== undefined &&
+ 		  $.data(this, SUB_GLB.LOCALSRC).indexOf(file) == 0) {
+			this.parentNode.removeEventListener("ended", streamEnd);
+			playstream(this, rcvkey)
+	 	}
+	})
+}
+
+
+function clearRcvBuffer(bkey){
+//	console.log("Deleting buffer key : " + bkey);
+	delete SUB_GLB.rcvbuffer[bkey];
+}
+
+
+function bufferStart(rcvkey) {
+	var xblock = SUB_GLB.rcvbuffer[rcvkey].block;
 	var tot = 0;
 	
 	for (i=0; i<xblock.length; i++){
 		tot = tot + xblock[i].length;
 	}
 	return(tot > 500000);
-}
-
-
-Subcon.prototype.playstream = function(el, buffkey) {
-	var timespot;
-	var url = window.URL || window.webkitURL;
-	var timedelay = 1000;
-	var audurl;
-
-		el.parentNode.pause();
-		timespot = el.parentNode.currentTime;
-//		console.log("Paused time  : " + timespot)
-	
-		if (el.src !== undefined && el.src.length > 0) {
-//			console.log("In revoke");
-			url.revokeObjectURL(el.src);
-		} else {
-			timedelay = 0;
-		}
-		
-		audurl = url.createObjectURL(new Blob(this.rcvbuffer[buffkey].block,
-									 	{type : this.rcvbuffer[buffkey].type}));
- 		el.src=audurl;
-	
-		setTimeout(function(){
-		el.parentNode.load();
-		el.parentNode.currentTime = timespot;
-		el.parentNode.play();	
-		}, timedelay)
-}
-
-
-
-Subcon.prototype.streamEnd = function(){
-
-	var self = this;
-	
-	$.each($(this).children('source'), function(){
-		if ($.data(this, SUB_GLB.LOCALSRC) !== undefined){
-			self.playstream(this, $.data(this, SUB_GLB.LOCALSRC))
-		}
-	})
-}
-
-
-Subcon.prototype.endStream = function(file) {
-	
-	var self = this;
-	
- $.each($('source').get(), function(){
-	 if ($.data(this, SUB_GLB.LOCALSRC) !== undefined &&
- 			$.data(this, SUB_GLB.LOCALSRC).indexOf(file) == 0) {
-				this.parentNode.removeEventListener("ended", self.streamEnd);
-				self.playstream(this, $.data(this, SUB_GLB.LOCALSRC))
-	 }
- })
-}
-
-
-Subcon.prototype.getdbname = function(){
-		
-	var xname = this.appPath.indexOf(SUB_GLB.SYS_DIR) == 0  ? SUB_GLB.DB_SYS : SUB_GLB.DB_USR;
-	return (xname + this.appName);
-}
-
-
-Subcon.prototype.fullPath = function(locpath){
-	
-	return(this.appPath + "/" + locpath);
-}
-
-
-Subcon.prototype.funcID = function(func){
-	
-	var funcidstr = SUB_GLB.callkey();
-	
-	SUB_GLB.callbackdb[funcidstr] = func;
-	return(funcidstr);
 }
 
 
@@ -751,24 +734,24 @@ function insertDB(table, values, func, password, subrtc) {
 		return;
 	}
 	
-	if (password == null) password = "";
-	if (subrtc == null) subrtc = Subcon.subrtc.default;
+	password = password || "";
+	subrtc = subrtc || Subcon.subrtc.default;
 	
-	var sqlpk = {db: subrtc.dbname, table: table, values: values, funcid: subrtc.funcID(func), password: password}
+	var sqlpk = {db: subrtc.dbname, table: table, values: values, funcid: funcID(func), password: password}
 
 	subrtc.conn.send(xhrCall('api/insertDB', 'sqlpk='+ 
-			encodeURIComponent(JSON.stringify(sqlpk)), 0, "POST"))
+			encodeURIComponent(JSON.stringify(sqlpk)), 0, null, "POST"))
 }
 
 
 function queryDB(qstr, args, limits, func, subrtc) {
-	
-	if (args == null) args = {};
-	if (limits == null) limits = {};
-	if (subrtc == null) subrtc = Subcon.subrtc.default;
+
+	args = args || {};
+	limits = limits || {};
+	subrtc = subrtc || Subcon.subrtc.default;
 	
 	var sqlpk = {db: subrtc.dbname, qstr: qstr, args: args,
-					limits: limits, funcid: subrtc.funcID(func)}
+					limits: limits, funcid: funcID(func)}
 	
 	subrtc.conn.send(xhrCall('api/queryDB','sqlpk='+ 
 			encodeURIComponent(JSON.stringify(sqlpk))))
@@ -777,20 +760,20 @@ function queryDB(qstr, args, limits, func, subrtc) {
 
 function updateDB(table, values, qstr, args, func, password, subrtc) {
 	
-	if (values == null || Object.keys(values).length == 0) {
+	if (values === null || Object.keys(values).length == 0) {
 		alert("Error: Update values is empty")
 		return;
 	}
 	
-	if (qstr == null) { qstr = "";}
-	if (password == null) password = "";
-	if (subrtc == null) subrtc = Subcon.subrtc.default;
+	qstr = qstr || "";
+	password = password || "";
+	subrtc = subrtc || Subcon.subrtc.default;
 	
 	var sqlpk = {db: subrtc.dbname, table: table, values: values,
-						qstr: qstr, args: args, funcid: subrtc.funcID(func), password: password}
+						qstr: qstr, args: args, funcid: funcID(func), password: password}
 
 	subrtc.conn.send(xhrCall('api/updateDB', 'sqlpk='+ 
-			encodeURIComponent(JSON.stringify(sqlpk)), 0, "POST"))
+			encodeURIComponent(JSON.stringify(sqlpk)), 0, null, "POST"))
 }
 
 
@@ -801,12 +784,12 @@ function removeDB(table, qstr, args, func, password, subrtc) {
 		return;
 	}
 	
-	if (qstr == null) { qstr = ""	}
-	if (password == null) password = "";
-	if (subrtc == null) subrtc = Subcon.subrtc.default;
+	qstr = qstr || "";
+	password = password || "";
+	subrtc = subrtc || Subcon.subrtc.default;
 	
 	var sqlpk = {db: subrtc.dbname, table: table, qstr: qstr,
-						args: args, funcid: subrtc.funcID(func), passord: password}
+						args: args, funcid: funcID(func), passord: password}
 	
 	subrtc.conn.send(xhrCall('api/removeDB', 'sqlpk='+ 
 			encodeURIComponent(JSON.stringify(sqlpk))))
@@ -815,62 +798,75 @@ function removeDB(table, qstr, args, func, password, subrtc) {
 
 function getMenu(func){
 	
-	Subcon.subrtc.default.conn.send(xhrCall('api/getMenu/' + Subcon.subrtc.default.funcID(func)));
+	Subcon.subrtc.default.conn.send(xhrCall('api/getMenu/' + funcID(func)));
 }
 
 
 function testPassword(passwd, tokenflg, func, subrtc){
 	
-	if (subrtc == null) subrtc = Subcon.subrtc.default;
+	subrtc = subrtc || Subcon.subrtc.default;
 	
 	subrtc.conn.send(xhrCall('api/testPassword/'+ passwd + '/' + (tokenflg ? 'T' : 'P') + '/' + 
-			subrtc.funcID(func)));
+			funcID(func)));
 	
 }
 
 
 function getToken(func){
 	
-	Subcon.subrtc.default.conn.send(xhrCall('api/getToken/' + Subcon.subrtc.default.funcID(func)));
-	
-	//subrtc.conn.send(xhrCall('api/getToken/' + subrtc.funcID(func)));
+	Subcon.subrtc.default.conn.send(xhrCall('api/getToken/' + funcID(func)));
 }
 
 
 function getsubFile(xfile, func){
-	Subcon.subrtc.default.conn.send(xhrCall(subCon.fullPath(xfile), null, 0, "GET", 
-			"subfile/" + Subcon.subrtc.default.funcID(func)));
+	Subcon.subrtc.default.conn.send(xhrCall(subCon.fullPath(xfile), null, 0, null, "GET", 
+			"subfile/" + funcID(func)));
 }
 
 
 
-function remotecall(subname, path, func, args, rtnval){
+function remotecall(subname, path, func, args, rtnval, counter){
 // path like sys/TestSite
 
-	if (subname === null || subname.length == 0) subname = SUB_GLB.subdomain;
+	subname = subname || SUB_GLB.subdomain;
 	
 	var fld = remoteKey(subname, path);
 	
-	console.log("Remote  call fld : " + fld + "  func : " + func);
-	if (Subcon.subrtc[fld] === undefined ||
-			Subcon.subrtc[fld].api === undefined) {
+//	console.log("Remote  call fld : " + fld + "  func : " + func);
+	if (Subcon.subrtc[fld] === undefined) {
 		
+//		console.log("subrtc is undefined 2 path : " + path)
+		Subcon.subrtc[fld] = {api : null};
+		Subcon.subrtc[fld].obj = new Subcon(path);
+
 		$( document ).on( "api" + fld, {
 		    subpath: fld
 		}, function( event, api ) {
 			$( document ).off(event.type);
-//			console.log("apiready fired type : " + event.type);
+//			console.log("apiready fired appPath : " + Subcon.subrtc[event.data.subpath].obj.appPath);
 //			console.log("apiready fired : " + event.data.subpath + "  func : " + func);
 			Subcon.subrtc[event.data.subpath].api = api;
 			Subcon.subrtc[event.data.subpath].api[func](args, rtnval,
 	 		Subcon.subrtc[event.data.subpath].obj);
 			});
-	
-		Subcon.subrtc[fld] = {};
-		Subcon.subrtc[fld].obj = new Subcon(path);
+		
 		Subcon.subrtc[fld].obj.peerServerOn(subname, path + "/js/api.json");
+	} else if (Subcon.subrtc[fld] === null  || Subcon.subrtc[fld].api === null){
+		console.log("remote call subrtc fld null : " + fld);
+//			console.log("Counter of timeout : " + counter)
+	// This is here so we do not get multiple remote objects
+			if (counter === undefined) counter = 0;
+			++counter;
+			if (counter > 100) {
+				console.log("remote call timed out");
+				return;
+			} else {
+//				console.log("remotecall setTimeout counter : " + counter);
+				setTimeout(remotecall, 200, subname, path, func, args, rtnval, counter);
+			}
 	} else {
 //		console.log("apiloaded : " + fld + "  func : " + func);
+//		console.log("apiloaded 2 appPath : " + Subcon.subrtc[fld].obj.appPath);
 		 Subcon.subrtc[fld].api[func](args, rtnval, Subcon.subrtc[fld].obj)
 	}
 }
@@ -886,7 +882,7 @@ function remoteKey(subname, xpath){
 function remoteclose(subname, path){
 // path like sys/TestSite
 		
-	if (subname === null || path === null){
+	if (subname === null || !path){
 
 		var propValue;
 		for(var propName in Subcon.subrtc) {	    
@@ -926,14 +922,15 @@ function blockInclude(str){
 }
 
 
-function xhrCall(file, args, cnt, type, mimetp){
+function xhrCall(file, args, cnt, rcvkey, type, mimetp){
 	
-	if (!args) args = "";
-	if (!cnt) cnt = 0;
-	if (!type) type = "GET";
-	if (!mimetp) mimetp = "";
-
-	return({type: type, file: file, args: args, cnt: cnt, mimetp: mimetp});
+	args = args || "";
+	cnt = cnt || 0;
+	rcvkey = rcvkey || SUB_GLB.callkey(); 
+	type = type || "GET";
+	mimetp = mimetp || "";
+	
+	return({type: type, file: file, args: args, cnt: cnt, rcvkey: rcvkey, mimetp: mimetp});
 }
 
 

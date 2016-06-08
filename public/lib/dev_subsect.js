@@ -97,8 +97,8 @@ function insertDB(table, values, func, password, subdb) {
 		return;
 	}
 
-	if (password == null) password = "";
-	if (subdb == null) subdb = SUB_GLB.getDbName();
+	password = password || "";
+	subdb = subdb || SUB_GLB.getDbName();
 	
 	var sqlpk = {db: subdb, table: table, values: values, funcid: "", password: password};
 	
@@ -109,9 +109,9 @@ function insertDB(table, values, func, password, subdb) {
 
 function queryDB(qstr, args, limits, func, subdb) {
 	
-	if (args == null) args = {};
-	if (limits == null) limits = {};
-	if (subdb == null) subdb = SUB_GLB.getDbName();
+	args = args || {};
+	limits = limits || {};
+	subdb = subdb || SUB_GLB.getDbName();
 	
 	var sqlpk = {db: subdb, qstr: qstr, args: args, limits: limits, funcid: ""}
 	
@@ -127,9 +127,9 @@ function updateDB(table, values, qstr, args, func, password, subdb) {
 		return;
 	}
 	
-	if (qstr == null) { qstr = "";}
-	if (password == null) password = "";
-	if (subdb == null) subdb = SUB_GLB.getDbName();
+	qstr = qstr || "";
+	password = password || "";
+	subdb = subdb || SUB_GLB.getDbName();
 	
 	var sqlpk = {db: subdb, table: table, values: values,
 							qstr: qstr, args: args, funcid: "", password: password}
@@ -147,9 +147,9 @@ function removeDB(table, qstr, args, func, password, subdb) {
 		return;
 	}
 	
-	if (qstr == null) { qstr = "" }
-	if (password == null) password = "";
-	if (subdb == null) subdb = SUB_GLB.getDbName();
+	qstr = qstr || "";
+	password = password || "";
+	subdb = subdb || SUB_GLB.getDbName();
 	
 	var sqlpk = {db: subdb, table: table, qstr: qstr, args: args, funcid: "", password: password};
 	
@@ -174,9 +174,9 @@ function getToken(func){
 	
 }
 
-function xhrSend(dbcall, argstr, rtnfunc,httpmethod){
+function xhrSend(dbcall, argstr, rtnfunc, httpmethod){
 	
-	if (!httpmethod) httpmethod = "GET";
+	httpmethod = httpmethod || "GET";
 	
 	// There is a cross domain problem with PUT
 	
@@ -218,11 +218,11 @@ function getBaseUrl(){
 
 
 
-function remotecall(subname, path, func, args, rtnval){
+function remotecall(subname, path, func, args, rtnval, counter){
 
 // This is much reduced for testing. Can only connect to local dev phone db.
 	
-	if (subname === undefined || subname === null || subname.length == 0) subname = SUB_GLB.LOCAL;
+	subname = subname || SUB_GLB.LOCAL;
 
 	var xpath = splitpath(path);
 	var fld = remoteKey(subname, path);
@@ -231,8 +231,8 @@ function remotecall(subname, path, func, args, rtnval){
 	var dbnm = (xpath[0].indexOf(SUB_GLB.SYS_DIR) == 0) ? SUB_GLB.DB_SYS : SUB_GLB.DB_USR;
 		dbnm = dbnm + xpath[1]
 
-	if (SUB_GLB.subrmt[fld] === undefined){
-		console.log("fld maybe remote set null: " + fld + " : " + func);
+	if (SUB_GLB.subrmt[fld] === undefined || (counter !== undefined && counter > 10)){
+		console.log("fld maybe remote set null: " + fld + " : " + func );
 		SUB_GLB.subrmt[fld] = null;
 		
 		$.ajax({	
@@ -250,10 +250,12 @@ function remotecall(subname, path, func, args, rtnval){
 						alert("XHR Get error : " + text)
 				}
 		});
-	} else if (SUB_GLB.subrmt[fld] === null){
-//		console.log("calling on null wait");
+	} else if (SUB_GLB.subrmt[fld] === null ){
+		console.log("Counter of timeout : " + counter)
 // This is here so we do not get multiple remote objects
-		setTimeout(remotecall, 1000, subname, path, func, args, rtnval);
+		if (counter === undefined) counter = 0;
+		++counter;
+		setTimeout(remotecall, 200, subname, path, func, args, rtnval, counter);
 	} else {
 		SUB_GLB.subrmt[fld][func](args, rtnval, dbnm);
 	}
@@ -263,11 +265,11 @@ function remotecall(subname, path, func, args, rtnval){
 function remoteclose(subname, path){
 // path like sys/TestSite
 	
-	if (subname == null || path == null){
+	if (subname === null || !path){
 
 		for(var propName in SUB_GLB.subrmt) {
 //			console.log("remoteclose 1 : " + propName)	    
-			if (subname == null || propName.startsWith(subname+"_")) {
+			if (subname === null || propName.startsWith(subname+"_")) {
 				delete SUB_GLB.subrmt[propName];	
 			}
 		}
