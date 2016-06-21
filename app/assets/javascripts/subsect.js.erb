@@ -357,13 +357,13 @@ Subcon.prototype.processBlob = function(data, xblob){
 		reader.onload = function(){
 		
 			var xread = JSON.parse(reader.result)
-			var tmpfunc = SUB_GLB.callbackdb[xread[0].funcid];
 			var tmpid = xread[0].funcid
+			var tmpfunc = SUB_GLB.callbackdb[tmpid];
 		
-			delete SUB_GLB.callbackdb.tmpid;
+			delete SUB_GLB.callbackdb[tmpid];	//This was .tmpid which isn't as good
 		
 			if (tmpfunc !== undefined && tmpfunc != null){
-				delete xread[0].funcid;
+				delete xread[0].funcid;					//This might be unneeded or wrong
 				setTimeout(tmpfunc, 0, xread);
 			}
 		}
@@ -460,7 +460,7 @@ Subcon.prototype.processBlob = function(data, xblob){
 			var tmpfunc = SUB_GLB.callbackdb[tmpid];
 //			console.log("In subfile : "+ tmpid + " tmpfunc : "+tmpfunc);
 			
-			delete SUB_GLB.callbackdb.tmpid;
+			delete SUB_GLB.callbackdb[tmpid];
 		
 			if (tmpfunc !== undefined && tmpfunc != null){
 				setTimeout(tmpfunc, 0, reader.result);
@@ -631,8 +631,9 @@ Subcon.prototype.fullPath = function(locpath){
 
 function funcID(func){
 	var funcidstr = SUB_GLB.callkey();
-	
+
 	SUB_GLB.callbackdb[funcidstr] = func;
+//	debugobj(SUB_GLB.callbackdb);
 	return(funcidstr);
 }
 
@@ -819,11 +820,18 @@ function getToken(func){
 
 
 function getsubFile(xfile, func){
-	Subcon.subrtc.default.conn.send(xhrCall(subCon.fullPath(xfile), null, 0, null, "GET", 
+	Subcon.subrtc.default.conn.send(xhrCall(Subcon.subrtc.default.fullPath(xfile), null, 0, null, "GET", 
 			"subfile/" + funcID(func)));
 }
 
 
+function getIPadd(func){
+	
+	Subcon.subrtc.default.conn.send(xhrCall('api/getIPadd/' + funcID(func)));
+}
+
+/* could also support api/savefile and api/deletefile here LOOK at this later */
+/* will need to get security nailed */
 
 function remotecall(subname, path, func, args, rtnval, counter){
 // path like sys/TestSite
@@ -962,7 +970,7 @@ SUB_GLB.callkey = (function () {
     var dt = new Date();
 	var cnt = 0;
 
-    return function () {return (++cnt).toString() + "F" + (dt.getSeconds() * 1000 + dt.getMilliseconds());}
+    return function () {return (++cnt).toString() + "f" + (dt.getSeconds() * 1000 + dt.getMilliseconds());}
 })();
 
 
@@ -998,3 +1006,18 @@ function deleteCookie(cname) {
 	console.log("Deleting cookie : " + xdel)
 	document.cookie = xdel;
 }
+
+/*
+function debugobj(xobj){		
+		var propValue;
+		
+		console.log("debug obj : Begin");
+		
+		for(var propName in xobj) {
+		    propValue = xobj[propName]
+
+	//	    console.log(propName,propValue);
+			console.log("debug obj : " + propName);
+		} 
+}
+*/

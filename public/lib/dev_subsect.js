@@ -174,6 +174,13 @@ function getToken(func){
 	
 }
 
+
+function getIPadd(func){
+	xhrSend('api/getIPadd/-1', "", func);
+	
+}
+
+
 function xhrSend(dbcall, argstr, rtnfunc, httpmethod){
 	
 	httpmethod = httpmethod || "GET";
