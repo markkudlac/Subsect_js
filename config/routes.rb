@@ -26,7 +26,7 @@ Rails.application.routes.draw do
       lambda { |r| r.subdomain.present? && r.subdomain != 'www' }
       
   get "/test", to: "static#test"
-  get "/subzaar", to: "appzips#subzaar"
+  get "/bazaar", to: "appzips#bazaar"
   
   get "/fucked", to: "devise/webrtc#client" #stupid but needed for current_page? and devise
   get "/shithead", to: "devise/static#home" #stupid but needed for current_page? and devise

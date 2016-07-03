@@ -4,6 +4,7 @@ body {
   font-family: verdana, arial, helvetica, sans-serif;
   font-size: 13px;
   line-height: 18px;
+  padding-left: 15px;
 }
 
 p, ol, ul, td {
@@ -37,6 +38,10 @@ div {
 
 #notice {
   color: green;
+}
+
+th, td {
+	padding: 5px 5px 5px 5px !important;
 }
 
 .field_with_errors {

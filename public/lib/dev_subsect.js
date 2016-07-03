@@ -56,7 +56,8 @@ var SUB_GLB = {
 	AUD_SRC: "SOURCE",
 	LOCAL: "dev",
 	subrmt: {},	//was null
-	useRTC: false
+	useRTC: false,
+	passtag: "passwd"
 };
 
 // console.log("Using Local 4 dev_subsect");
@@ -97,7 +98,7 @@ function insertDB(table, values, func, password, subdb) {
 		return;
 	}
 
-	password = password || "";
+	password = password || getPassword();
 	subdb = subdb || SUB_GLB.getDbName();
 	
 	var sqlpk = {db: subdb, table: table, values: values, funcid: "", password: password};
@@ -128,7 +129,7 @@ function updateDB(table, values, qstr, args, func, password, subdb) {
 	}
 	
 	qstr = qstr || "";
-	password = password || "";
+	password = password || getPassword();
 	subdb = subdb || SUB_GLB.getDbName();
 	
 	var sqlpk = {db: subdb, table: table, values: values,
@@ -148,7 +149,7 @@ function removeDB(table, qstr, args, func, password, subdb) {
 	}
 	
 	qstr = qstr || "";
-	password = password || "";
+	password = password || getPassword();
 	subdb = subdb || SUB_GLB.getDbName();
 	
 	var sqlpk = {db: subdb, table: table, qstr: qstr, args: args, funcid: "", password: password};
@@ -177,6 +178,18 @@ function getToken(func){
 
 function getIPadd(func){
 	xhrSend('api/getIPadd/-1', "", func);
+	
+}
+
+
+function setUploadDirectory(dir, func){
+	xhrSend('api/setuploaddir/" + dir + "/-1', "", func);
+	
+}
+
+
+function getUploadDirectory(func){
+	xhrSend('api/getuploaddir/-1', "", func);
 	
 }
 
@@ -320,11 +333,15 @@ function splitpath(apath) {
 }
 
 
-function setCookie(cname, cvalue, exdays) {
+function setCookie(cname, cvalue, exdays, subdom) {
     var d = new Date();
+	
+	subdom = subdom || "";
+	
     d.setTime(d.getTime() + (exdays*24*60*60*1000));
     var expires = "expires="+d.toUTCString();
-    document.cookie = cname + "=" + JSON.stringify(cvalue) + "; " + expires + "; path=/; domain=.subsect.net";
+    document.cookie = cname + "=" + JSON.stringify(cvalue) + "; " + expires + "; path=/; domain="+
+			subdom + ".subsect.net";
 }
 
 
@@ -342,13 +359,22 @@ function getCookie(cname) {
             return JSON.parse(c.substring(name.length, c.length));
         }
     }
-    return {};
+    return null;
 }
 
 
-function deleteCookie(cname) {
+function deleteCookie(cname, subdom) {
 	
-	var xdel = cname+"=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=.subsect.net";
-	console.log("Deleting cookie : " + xdel)
+	subdom = subdom || "";
+	
+	var xdel = cname+"=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=" + subdom + ".subsect.net";
+//	console.log("Deleting cookie : " + xdel)
 	document.cookie = xdel;
 }
+
+
+function getPassword() {
+	
+	return(getCookie(SUB_GLB.passtag) || "");
+}
+

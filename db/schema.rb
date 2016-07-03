@@ -11,11 +11,11 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150323192207) do
+ActiveRecord::Schema.define(version: 20160703150049) do
 
   create_table "appzips", force: :cascade do |t|
-    t.integer  "user_id",                                 null: false
-    t.text     "zipfile",                                 null: false
+    t.integer  "user_id",                                  null: false
+    t.text     "zipfile",                                  null: false
     t.string   "pkgname",     limit: 15
     t.integer  "filesize",                 default: 0
     t.string   "title",       limit: 40
@@ -23,8 +23,9 @@ ActiveRecord::Schema.define(version: 20150323192207) do
     t.text     "icon"
     t.string   "dbtype",      limit: 2,    default: "U_"
     t.string   "status",      limit: 1,    default: "A"
-    t.datetime "created_at",                              null: false
-    t.datetime "updated_at",                              null: false
+    t.datetime "created_at",                               null: false
+    t.datetime "updated_at",                               null: false
+    t.string   "permissions", limit: 3,    default: "FFF"
   end
 
   add_index "appzips", ["pkgname"], name: "index_appzips_on_pkgname"

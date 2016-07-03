@@ -1,13 +1,12 @@
 <div class="container-fluid">
 	
 	<div class="center">
-		<h1>Subzaar</h1>
+		<h1>Bazaar</h1>
 	</div>
 
 <table class="table table-condensed">
   <thead>
     <tr>
-      <th>Id</th>
       <th>Application</th>
       <th>Filesize</th>
       <th>Icon</th>
@@ -18,7 +17,6 @@
   <tbody>
     <% @appzips.each do |appzip| %>
       <tr>
-        <td><%= appzip.id %></td>
         <td><%= appzip.title %></td>
         <td><%= appzip.filesize %></td>
         <td onclick="runinstall(<%= appzip.id %>, <%= appzip.zipfile.bytesize %>,

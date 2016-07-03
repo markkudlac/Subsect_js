@@ -86,7 +86,7 @@ class AppzipsController < ApplicationController
     render json: @appzip
   end
   
-  def subzaar
+  def bazaar
     @appzips = Appzip.all
   end
   
@@ -99,6 +99,6 @@ class AppzipsController < ApplicationController
     # Never trust parameters from the scary internet, only allow the white list through.
     def appzip_params
       params.require(:appzip).permit(:user_id, :zipfile, :pkgname, :filesize,
-       :title, :description, :icon, :dbtype)
+       :title, :description, :icon, :dbtype, :permissions)
     end
 end
