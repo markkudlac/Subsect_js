@@ -55,6 +55,7 @@ var SUB_GLB = {
 	DB_USR: "U_",
 	AUD_SRC: "SOURCE",
 	LOCAL: "dev",
+	subdomain: "dev",
 	subrmt: {},	//was null
 	useRTC: false,
 	passtag: "passwd"
@@ -91,7 +92,7 @@ function processimg(el, imgsrc){
 }
 
 	
-function insertDB(table, values, func, password, subdb) {
+function insertDB(table, values, func, subdb, password) {
 	
 	if (values == null || Object.keys(values).length == 0) {
 		alert("Error: Insert values is empty")
@@ -108,20 +109,41 @@ function insertDB(table, values, func, password, subdb) {
 }
 
 
-function queryDB(qstr, args, limits, func, subdb) {
+function queryDB(qstr, args, limits, func, subdb, password) {
 	
 	args = args || {};
 	limits = limits || {};
 	subdb = subdb || SUB_GLB.getDbName();
+	password = password || getPassword();
 	
-	var sqlpk = {db: subdb, qstr: qstr, args: args, limits: limits, funcid: ""}
+	var table = "";
+	qstr = qstr.replace(/\s{2,}/g," ");
+	var tabary = qstr.trim().split(" ");
+	
+//	console.log ("Table array length : " + tabary.length)
+	if (tabary.length == 1){
+		table = tabary[0];
+	} else {
+		tablab : {
+			for (var i=0; i < tabary.length; i++){
+				if (tabary[i].toLowerCase() == "from") {
+					table = tabary[i+1];
+					break tablab;
+				}
+			}
+			console.log("queryDB table name not found");	// LEAVE IN do not comment out
+		}
+	}
+	
+	var sqlpk = {db: subdb, qstr: qstr, args: args, limits: limits, funcid: "",
+				table: table, password: password}
 	
 	xhrSend('api/queryDB', 'sqlpk='+ 
 			encodeURIComponent(JSON.stringify(sqlpk)),func)
 }
 
 
-function updateDB(table, values, qstr, args, func, password, subdb) {
+function updateDB(table, values, qstr, args, func, subdb, password) {
 	
 	if (values == null || Object.keys(values).length == 0) {
 		alert("Error: Update values is empty")
@@ -141,7 +163,7 @@ function updateDB(table, values, qstr, args, func, password, subdb) {
 }
 
 
-function removeDB(table, qstr, args, func, password, subdb) {
+function removeDB(table, qstr, args, func, subdb, password) {
 	
 	if (args == null || Object.keys(args).length == 0) {
 		alert("Error: removeDB args is empty")

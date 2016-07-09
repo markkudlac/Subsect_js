@@ -1,6 +1,6 @@
 class AppzipsController < ApplicationController
   before_action :set_appzip, only: [:show, :edit, :update, :destroy, :serve]
-  before_action :authenticate_user!, except: [:serve, :subzaar]
+  before_action :authenticate_user!, except: [:serve, :bazaar]
   
   # GET /appzips
   # GET /appzips.json

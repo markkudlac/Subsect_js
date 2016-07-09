@@ -340,8 +340,9 @@ Subcon.prototype.callServer = function() {
 	  });
 
 	  // Send messages
+	 
 	  console.log("Call for app : "+ self.loadPath);
-	  self.conn.send(xhrCall(self.loadPath));
+	  self.conn.send(xhrCall(self.loadPath, "SUBSECT_passwd=" + (getPassword() || "abc")));
 		});
 }	
 
@@ -746,21 +747,42 @@ function insertDB(table, values, func, password, subrtc) {
 }
 
 
-function queryDB(qstr, args, limits, func, subrtc) {
+function queryDB(qstr, args, limits, func, subrtc, password) {
 
 	args = args || {};
 	limits = limits || {};
 	subrtc = subrtc || Subcon.subrtc.default;
+	password = password || getPassword();
+	
+	var table = "";
+	qstr = qstr.replace(/\s{2,}/g," ");
+	var tabary = qstr.trim().split(" ");
+	
+//	console.log ("Table array length : " + tabary.length)
+	if (tabary.length == 1){
+		table = tabary[0];
+	} else {
+		tablab : {
+			for (var i=0; i < tabary.length; i++){
+				if (tabary[i].toLowerCase() == "from") {
+					table = tabary[i+1];
+					break tablab;
+				}
+			}
+			console.log("queryDB table name not found");	// LEAVE IN do not comment out
+		}
+	}
+	
 	
 	var sqlpk = {db: subrtc.dbname, qstr: qstr, args: args,
-					limits: limits, funcid: funcID(func)}
+					limits: limits, funcid: funcID(func), table: table, password: password}
 	
 	subrtc.conn.send(xhrCall('api/queryDB','sqlpk='+ 
 			encodeURIComponent(JSON.stringify(sqlpk))))
 }
 
 
-function updateDB(table, values, qstr, args, func, password, subrtc) {
+function updateDB(table, values, qstr, args, func, subrtc, password) {
 	
 	if (values === null || Object.keys(values).length == 0) {
 		alert("Error: Update values is empty")
@@ -779,7 +801,7 @@ function updateDB(table, values, qstr, args, func, password, subrtc) {
 }
 
 
-function removeDB(table, qstr, args, func, password, subrtc) {
+function removeDB(table, qstr, args, func, subrtc, password) {
 	
 	if (args == null || Object.keys(args).length == 0) {
 		alert("Error: removeDB args is empty")
@@ -791,7 +813,7 @@ function removeDB(table, qstr, args, func, password, subrtc) {
 	subrtc = subrtc || Subcon.subrtc.default;
 	
 	var sqlpk = {db: subrtc.dbname, table: table, qstr: qstr,
-						args: args, funcid: funcID(func), passord: password}
+						args: args, funcid: funcID(func), password: password}
 	
 	subrtc.conn.send(xhrCall('api/removeDB', 'sqlpk='+ 
 			encodeURIComponent(JSON.stringify(sqlpk))))
@@ -1016,7 +1038,7 @@ function getCookie(cname) {
 }
 
 
-function deleteCookie(cname) {
+function deleteCookie(cname, subdom) {
 	
 	subdom = subdom || "";
 	
