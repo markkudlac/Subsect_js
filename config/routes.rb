@@ -17,9 +17,11 @@ Rails.application.routes.draw do
   get 'pkg/', to: 'webrtc#client'
   
   get "/api/getrtcid/:subname", to: "api#getrtcid"
-  get "/api/setrtcid/:subname/:rtcid", to: "api#setrtcid"
-  get "/api/offline/:subname", to: "api#offline"
-  get "/api/control/:subname", to: "api#control"
+  get "/api/setrtcid/:subname/:passwd/:rtcid", to: "api#setrtcid"
+  get "/api/hostavailable/:subname", to: "api#hostavailable"
+  get "/api/hostsubmit/:subname/:passwd", to: "api#hostsubmit"
+  get "/api/offline/:subname/:passwd", to: "api#offline"
+  get "/api/control/:subname/:passwd", to: "api#control"
   get "/api/serve/:id", to: "appzips#serve"
   
   get "/", to: 'webrtc#client', constraints: 

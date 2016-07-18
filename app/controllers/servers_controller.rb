@@ -1,6 +1,6 @@
 class ServersController < ApplicationController
   before_action :set_server, only: [:show, :edit, :update, :destroy]
-
+  before_action :authenticate_user!
   # GET /servers
   # GET /servers.json
   def index
@@ -69,7 +69,7 @@ class ServersController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def server_params
-      params.require(:server).permit(:subname, :deviceid, :rtcid, :status)
+      params.require(:server).permit(:subname, :deviceid, :rtcid, :status, :contact)
     end
     
 end

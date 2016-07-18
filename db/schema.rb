@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160703150049) do
+ActiveRecord::Schema.define(version: 20160713221352) do
 
   create_table "appzips", force: :cascade do |t|
     t.integer  "user_id",                                  null: false
@@ -38,6 +38,8 @@ ActiveRecord::Schema.define(version: 20160703150049) do
     t.string   "status",     limit: 1,  default: "A", null: false
     t.datetime "created_at",                          null: false
     t.datetime "updated_at",                          null: false
+    t.string   "passwd",     limit: 40
+    t.string   "contact",    limit: 50
   end
 
   add_index "servers", ["subname"], name: "index_servers_on_subname", unique: true
