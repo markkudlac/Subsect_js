@@ -1,2 +1,80 @@
-<h1>Subsect.net Home</h1>
+<style>
+	
+.linker{
+	color: #459fec;
+}
 
+a:visited {
+	color: #459fec !important;
+}
+
+a:hover {
+	background-color: #eee !important;
+}
+</style>
+
+
+<div class="container-fluid" style="margin-top: 1em">
+	<div class="row">
+		<div class="col-sm-6">
+			<div class="row">
+				<div class="col-xs-offset-1 col-xs-11">
+					<img src="http://www.subsect.net/subsect_logo512.png" class="pull-left" 
+						style="height: 7em; width: 7em; margin-right: 1em"/>
+		
+					<div>	
+						<div style="font-weight: bold; font-size: 300%">Subsect</div>
+						<div style="color: #777; font-size: 150%">Use the Upside</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="row" >
+		<div class="col-xs-offset-2 col-xs-8" style="margin-top: 3em; color: #777; font-size: 130%">
+			<div>
+			In many ways the promise of the early web has not been realized. Some believe that our information infrastructure has been distored by the presense of a small number of large bodies. That although the walls of the web are transparent they actually behave more like one way mirrors than windows.
+		</div>
+		<div style="margin-top: 1em">Subsect proposes to rebalance the current asymetries by providing a platform which allows individuals to have a persistent dynamic web presense hosted on their own internet connected Android device.
+		</div>
+		</div>
+	</div>
+	
+	<div class="row" >
+		<div class="col-sm-6">
+			<div class="row">
+				<div class="col-xs-offset-1 col-xs-10" style="margin-top: 3em;">
+					<div class="center"><h3>Try the Demo</h3></div>
+					<div id="webrtc_yes">
+						The Subsect server is a general platform and can host a wide variety of web apps and content. The demo site you are about to visit is serving blogging software from a Nexus 4. Welcome to <a class="linker" href="http://demo.subsect.net/pkg/Publish#/article-one">Publish</a> .
+					</div>
+					<div id="webrtc_no" class="hidden">
+						Your current browser does not support WebRTC data channel. On any desktop system (OSX, Windows, Linux) and mobile Android Chrome, FireFox and Opera work fine. Safari is not compatable and no (mainstream) browser on iOS is currently WebRTC enabled. Please try one of the above. 
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<div class="col-sm-6">
+			<div class="row">
+				<div class="col-xs-offset-1 col-xs-10" style="margin-top: 3em;">
+					<div class="center"><h3>Download the APK</h3></div>
+					This is col2. <a class="linker" href="http://www.subsect.net/lib/app-debug.apk">Download apk</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+</div>
+
+
+
+<script>
+
+	if (!util.supports.data) {
+		$("#webrtc_yes").addClass("hidden");
+		$("#webrtc_no").removeClass("hidden");
+	}
+	
+</script>
