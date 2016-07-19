@@ -19,9 +19,8 @@ a:hover {
 		<div class="col-sm-6">
 			<div class="row">
 				<div class="col-xs-offset-1 col-xs-11">
-					<img src="http://www.subsect.net/subsect_logo512.png" class="pull-left" 
-						style="height: 7em; width: 7em; margin-right: 1em"/>
-		
+					<%= image_tag( "subsect_logo512.png", class: "pull-left",
+					 style: "height: 7em; width: 7em; margin-right: 1em") %>
 					<div>	
 						<div style="font-weight: bold; font-size: 300%">Subsect</div>
 						<div style="color: #777; font-size: 150%">Use the Upside</div>
@@ -32,7 +31,7 @@ a:hover {
 	</div>
 	
 	<div class="row" >
-		<div class="col-xs-offset-2 col-xs-8" style="margin-top: 3em; color: #777; font-size: 130%">
+		<div class="col-xs-offset-1 col-xs-10 col-sm-offset-2 col-sm-8" style="margin-top: 3em; color: #777; font-size: 130%; text-align: justify">
 			<div>
 			In many ways the promise of the early web has not been realized. Some believe that our information infrastructure has been distored by the presense of a small number of large bodies. That although the walls of the web are transparent they actually behave more like one way mirrors than windows.
 		</div>
@@ -46,10 +45,10 @@ a:hover {
 			<div class="row">
 				<div class="col-xs-offset-1 col-xs-10" style="margin-top: 3em;">
 					<div class="center"><h3>Try the Demo</h3></div>
-					<div id="webrtc_yes">
+					<div id="webrtc_yes" style="text-align: justify">
 						The Subsect server is a general platform and can host a wide variety of web apps and content. The demo site you are about to visit is serving blogging software from a Nexus 4. Welcome to <a class="linker" href="http://demo.subsect.net/pkg/Publish#/article-one">Publish</a> .
 					</div>
-					<div id="webrtc_no" class="hidden">
+					<div id="webrtc_no" class="hidden"  style="text-align: justify">
 						Your current browser does not support WebRTC data channel. On any desktop system (OSX, Windows, Linux) and mobile Android Chrome, FireFox and Opera work fine. Safari is not compatable and no (mainstream) browser on iOS is currently WebRTC enabled. Please try one of the above. 
 					</div>
 				</div>
@@ -60,8 +59,9 @@ a:hover {
 			<div class="row">
 				<div class="col-xs-offset-1 col-xs-10" style="margin-top: 3em;">
 					<div class="center"><h3>Download the APK</h3></div>
-					This is col2. <a class="linker" href="http://www.subsect.net/lib/app-debug.apk">Download apk</a>
-				</div>
+					<div style="text-align: justify"">
+					The Subsect server is still alpha software. If you would like to try setting up your own server and have an Android device that is 5.0 or higher you can <a class="linker" href="http://www.subsect.net/lib/app-debug.apk">Download the APK here.</a> There are configuration instructions at the Github repository <a class="linker" href="https://github.com/markkudlac/Subsect_android/tree/master">Subsect_android</a> .
+				</div></div>
 			</div>
 		</div>
 	</div>
