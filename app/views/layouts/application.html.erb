@@ -2,6 +2,9 @@
 <html>
 <head>
   
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="google-site-verification" content="ikdJUhzQ4XYFhrfgsnelwGZ08XqzTJ_YJVh9WwFJSdI" />
+  
   <%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track' => true %>
   <%= javascript_include_tag 'application', 'data-turbolinks-track' => true %>
   <%= favicon_link_tag %>
@@ -15,9 +18,6 @@
 		<%= javascript_include_tag 'subsect', 'data-turbolinks-track' => true %>
 		
 		<%= javascript_include_tag 'peer.0.3.13', 'data-turbolinks-track' => true %>
-		<!--
-		<% javascript_include_tag "http://cdn.peerjs.com/0.3/peer.min.js" %>
-		-->
 			
 	<% else %>
 		<% if current_page?(controller: 'static', action: "home") then %>
@@ -25,7 +25,11 @@
 		<% end %>
 		
 		<title>Subsect</title>
+		<meta name="Description" CONTENT="Subsect is a platform which allows individuals to have a persistent dynamic web presense hosted on their own internet connected mobile device." />
+		
+		<!--
 		<meta name="viewport" content="width=device-width, initial-scale=1"></meta>
+			-->
 		
 		<%= csrf_meta_tags %>
 	<% end %>
