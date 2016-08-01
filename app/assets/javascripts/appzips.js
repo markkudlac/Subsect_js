@@ -27,7 +27,7 @@ function generateAlertHtml(){
 style="padding-left: 10px">Alert</h4></div><div class="modal-body"><p id="alertmess"></p> \
 </div><div class="modal-footer"><button class="btn btn-default" data-dismiss="modal"> \
 Close</button><button id="continueop" class="btn btn-primary hidden" \
-data-dismiss="modal">Continue</button></div></div></div>/div>'
+data-dismiss="modal">Continue</button></div></div></div></div>'
 		);
 	}
 }

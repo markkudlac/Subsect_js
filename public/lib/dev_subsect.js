@@ -2,12 +2,19 @@
 
 document.writeln('<meta name="viewport" content="width=device-width, initial-scale=1" />');
 
+if (typeof sublochost === 'string'){
+	document.writeln('<script src="http://'+sublochost+'/sys/lib/jquery-2.1.3.min.js"></script>');
+	document.writeln('<script src="http://'+sublochost+'/sys/lib/bootstrap_3.3.6.min.js"></script>');
+	document.writeln('<link rel="stylesheet" href="http://'+sublochost+'/sys/lib/bootstrap_3.3.6.min.css">');
+	document.writeln('<script src="http://'+sublochost+'/sys/lib/angular_1.4.9.min.js"></script>');
+	document.writeln('<script src="http://'+sublochost+'/sys/lib/angular-route_1.4.9.min.js"></script>');
+} else {
 document.writeln('<script src="http://code.jquery.com/jquery-2.1.3.min.js"></script>');
 document.writeln('<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>');
 document.writeln('<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">');
 document.writeln('<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js"></script>');
 document.writeln('<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular-route.min.js"></script>');
-
+}
 
 function alertmodal(str, func){
   
@@ -37,7 +44,7 @@ function generateAlertHtml(){
 style="padding-left: 10px">Alert</h4></div><div class="modal-body"><p id="alertmess"></p> \
 </div><div class="modal-footer"><button class="btn btn-default" data-dismiss="modal"> \
 Close</button><button id="continueop" class="btn btn-primary hidden" \
-data-dismiss="modal">Continue</button></div></div></div>/div>'
+data-dismiss="modal">Continue</button></div></div></div></div>'
 		);
 	}
 }	
