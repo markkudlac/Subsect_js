@@ -1,35 +1,105 @@
-<div class="container-fluid">
+
+<style>
 	
-	<div class="center">
+body {
+	padding-left: 0px !important;
+}
+
+.desctext {
+	font-size: 130%;
+	line-height: 130%;
+}
+
+.desctext * {
+	font-size: inherit;
+	line-height: inherit;
+}
+
+.desctext p {
+	text-align: justify;
+}
+
+.iconimg {
+	height: 50px;
+	width: 50px;
+}
+
+</style>
+
+<div class="container-fluid">
+	<div id="sitelist">
+	<div class="row center">
 		<h1>Bazaar</h1>
 	</div>
+	
+	<div class="col-xs-offset-1 col-xs-10 col-sm-offset-1 col-sm-10 col-md-offset-2 col-md-8">
+	<div class="row">
+		<table class="table table-condensed">
+		  <thead>
+		    <tr>
+		      <th>Site  &lt Description &gt</th>
+		      <th>&lt Install &gt</th>
+		    </tr>
+		  </thead>
 
-<table class="table table-condensed">
-  <thead>
-    <tr>
-      <th>Application</th>
-      <th>Filesize</th>
-      <th>Icon</th>
-			<th>Progress</th>
-    </tr>
-  </thead>
+		  <tbody>
+		    <% @appzips.each do |appzip| %>
+		      <tr>
+		        <td onclick="showinfo('<%= appzip.title %>', '<%= appzip.description %>', '<%= 'icon' + appzip.id.to_s %>', <%= appzip.zipfile.bytesize %>)">
+					<h4 style="margin-left: 1em;"><%= appzip.title %><h4></td>
+		        <td onclick="runinstall(<%= appzip.id %>, <%= appzip.zipfile.bytesize %>,
+							'<%= appzip.title %>')">
+							<img id="<%= 'icon' + appzip.id.to_s %>" class="iconimg" 
+								src="<%= appzip.icon %>"></td>
+		      </tr>
+		    <% end %>
+		  </tbody>
+		</table>
+	</div></div></div>
+	
+	<div id="siteinfo" class="row hidden" style="margin-top: 1em">
+		<div class="col-xs-offset-1 col-xs-10 col-sm-offset-1 col-sm-10 col-md-offset-2 col-md-8">
+			<div class="row">
+				<button onclick="infoback()" type="button" class="btn btn-primary btn-sm pull-left">Back</button>
+				<img id="infoicon" class="pull-right iconimg" >
+			</div>
+			<div class="row center" style="margin-bottom: 1.5em;">
+				<h2 id="infotitle"></h2>
+			</div>
+		
+			<div class="row">
+				<div id="infodesc" class="desctext"></div>
+			</div>
+			
+			<div class="row" style="margin-top: 1.5em; margin-bottom: 1em">
+				<h4><b>File Size : </b><span id="infosize"></span> KB</h4>
+			</div>
+		</div>
+	</div>
 
-  <tbody>
-    <% @appzips.each do |appzip| %>
-      <tr>
-        <td><%= appzip.title %></td>
-        <td><%= appzip.filesize %></td>
-        <td onclick="runinstall(<%= appzip.id %>, <%= appzip.zipfile.bytesize %>,
-					'<%= appzip.title %>')">
-					<img id="icon" style="height: 50px; width: 50px" 
-						src="<%= appzip.icon %>"></td>
-				<td><span id="progmess"></span><br>
-				<span id="progper"></span></td>
-      </tr>
-    <% end %>
-  </tbody>
-</table>
+</div>
 
+<div class="modal fade" id="displayProg" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+        <h4 id="headProg" class="modal-title">Install</h4>
+      </div>
+	  
+      <div class="modal-body">
+		<div class="row center" style="margin-left: 1em; margin-right: 1em">
+			<div class="progress">
+			  <div id="progper" class="progress-bar" role="progressbar" style="width: 0%; min-width: 2em;">
+			    0%
+			  </div>
+			</div>
+		
+			<h4 id="progmess"></h4>
+		</div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script> 
@@ -39,8 +109,13 @@ function runinstall(id, filesize, title){
 		alertmodal("Can install only from phone");
 	} else {
 		alertmodal("Continue to install : " + title, function(){
-			$("#progmess").text("Begin Download")
-			android.install(id, filesize);
+			$("#headProg").text("Installing : " + title);
+			$("#progper").css("width", "0%").text("0%");
+			$("#displayProg").modal("show");
+			$("#progmess").text("Begin Download");
+			
+			setTimeout(function(){android.install(id, filesize);}, 1000);
+			//timeout used just for cosmetic reasons
 		});
 	}
 }
@@ -49,18 +124,39 @@ function runinstall(id, filesize, title){
 function updateProg(percent){
 //	console.log("updateProg : "+percent)
 	if (percent >= 0 && percent <= 100) {
-		$("#progper").text(percent)
+		$("#progper").text(percent.toString()+"%").css("width", percent.toString()+"%");
 		$("#progmess").text("Downloading File")
 	} else if (percent == -1001){
-		$("#progper").text("")
-		$("#progmess").text("Installing Site")
+		$("#progmess").text("Begin Download")
 	} else if (percent == -1002){
-		$("#progper").text("")
+		$("#progper").text("100%").css("width", "100%");
 		$("#progmess").text("Installation Successful")
+		//timeout used just for cosmetic reasons
+		setTimeout(function(){$("#displayProg").modal("hide");}, 2000);
 	} else {
-		$("#progmess").text("Error : Failed")
+		$("#progmess").text("Install Failed")
 	}
 }
+
+
+function showinfo(title, desc, iconid, filesize){
+//	alert("Title : " + title + "  Filesz : " + filesize);
+
+	$("#infotitle").text(title);
+	$("#infodesc").html(desc);
+	$("#infoicon").attr("src", $("#"+iconid).attr("src"));
+	$("#infosize").text(Math.round(filesize / 1000).toString())
+	
+	$("#sitelist").addClass("hidden");
+	$("#siteinfo").removeClass("hidden");
+}
+
+
+function infoback(){
+	$("#sitelist").removeClass("hidden");
+	$("#siteinfo").addClass("hidden");
+}
+
 </script>
 
 
