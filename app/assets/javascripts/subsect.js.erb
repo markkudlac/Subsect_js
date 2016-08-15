@@ -241,8 +241,8 @@ Subcon.prototype.peerClientOn = function(subname, peerid, customConfig){
     			}
   			})
   			.fail(function(xhr, text){
-					self.peerShutDown();
-					clearspinner();
+				self.peerShutDown();
+				clearspinner();
     			alert("Server call failed : " + text);
   			});
 			} else {
@@ -251,11 +251,16 @@ Subcon.prototype.peerClientOn = function(subname, peerid, customConfig){
 		});
 		
 		this.peer.on('error', function(err) {
-			  alert('Peer client ERROR : ' + err.type + " : " + err.message);
-			});
+			var tmpstr = "Peer client ERROR : " + err.type + " : " + err.message;
+		//	 console.log(tmpstr);
+	//The setTimeout is done to stop flasing of error in Firefox
+			setTimeout(2000, function(){
+			 alert(tmpstr);
+			 });
+		});
 			
 	  this.peer.on('disconnect', function() {
-			alert('Peer client Disconnect event');
+		alert('Peer client Disconnect event ');
 		});
 }
 
@@ -264,11 +269,15 @@ Subcon.prototype.makeConnection = function(peerid){
 	
 	this.conn = this.peer.connect(peerid, {reliable: true});
 	this.conn.on('disconected', function(){
+		
 		alert("Peer.connect DISCONNECTED");
 	});
 	
 	this.conn.on('error', function(err){
-		alert("Peer connect ERROR event : " + err.type + " : " + err.message);
+		//The setTimeout is done to stop flasing of error in Firefox
+		setTimeout(2000, function(){
+			alert("Peer connect ERROR event : " + err.type + " : " + err.message);
+		});
 	});
 	this.callServer()
 }
