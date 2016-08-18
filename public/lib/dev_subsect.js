@@ -196,6 +196,21 @@ function getMenu(func) {
 }
 
 
+function getsubFile(xfile, func){
+	var xpath = fullPath(xfile);
+	
+	returnFile(fullPath(xfile), func);
+}
+
+
+function fullPath(xfile){
+	
+	var pathary = splitpath(location.pathname);
+	
+	return(pathary[0] + "/" + pathary[1] + "/" + xfile);
+}
+
+
 function testPassword(passwd, tokenflg, func){
 	xhrSend('api/testPassword/' + passwd + '/' + (tokenflg ? 'T' : 'P') + '/-1', "", func);
 	
@@ -240,6 +255,22 @@ function xhrSend(dbcall, argstr, rtnfunc, httpmethod){
 		dataFilter: function(xrtn){
 				return(JSON.parse(xrtn));
 			},
+		success: rtnfunc,
+		error: function(xhr,text){
+					alert("XHR Get error : " + text)
+			}
+	});
+}
+
+
+function returnFile(dbcall, rtnfunc){
+	
+	// There is a cross domain problem with PUT
+	
+	$.ajax({	
+		url: "http://" + location.host + "/" + dbcall,
+		cache: false,
+		method: "GET",
 		success: rtnfunc,
 		error: function(xhr,text){
 					alert("XHR Get error : " + text)
