@@ -312,6 +312,15 @@ Subcon.prototype.callServer = function() {
 			
 			var xblob;
 //console.log("conn.on get blobs cnt : " + data.cnt + "  data.rcvkey : " + data.rcvkey + "  data.uri : " + data.uri)
+//console.log("status os file return : " + data.status);
+
+			if (parseInt(data.status) != 200) {
+				//This is a bad hack that needs to be looked at later. Error handling is BAD!!!!
+				alert("Server Error : " + data.status + " : " + data.uri);
+				alert("Install : " + data.uri.split("/")[1]);
+			return;
+			}
+			
 			if (data.cnt == 0){
 				
 				xblob = new Blob([ new Uint8Array(data.blob) ], {type : data.blobtype});
@@ -449,7 +458,7 @@ Subcon.prototype.processBlob = function(data, xblob){
 			 datatag = $.data(this, SUB_GLB.LOCALSRC)
 		 
 			 if (datatag !== undefined) {
-					 	console.log("img data : " + datatag + " uri : " + data.uri)
+			// 	console.log("img data : " + datatag + " uri : " + data.uri)
 
 				if (data.uri.indexOf(datatag) == 0){
 			 		this.src=imgurl
@@ -885,7 +894,7 @@ function remotecall(subname, path, func, args, rtnval, counter){
 	
 	var fld = remoteKey(subname, path);
 	
-//	console.log("Remote  call fld : " + fld + "  func : " + func);
+	console.log("Remote  call fld : " + fld + "  func : " + func);
 	if (Subcon.subrtc[fld] === undefined) {
 		
 //		console.log("subrtc is undefined 2 path : " + path)
