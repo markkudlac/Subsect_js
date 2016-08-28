@@ -314,7 +314,7 @@ Subcon.prototype.callServer = function() {
 //console.log("conn.on get blobs cnt : " + data.cnt + "  data.rcvkey : " + data.rcvkey + "  data.uri : " + data.uri)
 //console.log("status os file return : " + data.status);
 
-			if (parseInt(data.status) != 200) {
+			if (data.status && parseInt(data.status) != 200) {
 				//This is a bad hack that needs to be looked at later. Error handling is BAD!!!!
 				alert("Server Error : " + data.status + " : " + data.uri);
 				alert("Install : " + data.uri.split("/")[1]);
