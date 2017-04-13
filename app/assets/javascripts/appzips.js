@@ -40,7 +40,9 @@ function toast(jqstr, str){
 } 
 
 
-$("#emaillink").click(function()
+$(document).ready(function(){
+$("#emaillink").one("click", function()
  {
-     document.location.href = "mailto:mark@subsect.net";
+ 	$("#emaillink").attr("href","mailto:mark@subsect.net")
  });
+});
