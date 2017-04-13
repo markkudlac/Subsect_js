@@ -38,3 +38,9 @@ function toast(jqstr, str){
     jqobj.popover({content: str, placement: "bottom", triggetr: "manual"}).popover("show");
     setTimeout(function(){jqobj.popover("destroy")}, 3000);
 } 
+
+
+$("#emaillink").click(function()
+ {
+     document.location.href = "mailto:mark@subsect.net";
+ });
