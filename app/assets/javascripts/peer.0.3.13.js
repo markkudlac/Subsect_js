@@ -572,7 +572,13 @@ Negotiator._setupListeners = function(connection, pc, pc_id) {
 
   // MEDIACONNECTION.
   util.log('Listening for remote stream');
+  
+/*
+Mozilla complains onaddstream is depricated use ontrack instead
   pc.onaddstream = function(evt) {
+
+*/
+  pc.ontrack = function(evt) {			//MK update this could be big
     util.log('Received remote stream');
     var stream = evt.stream;
     var connection = provider.getConnection(peerId, connectionId);
