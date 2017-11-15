@@ -578,7 +578,7 @@ Mozilla complains onaddstream is depricated use ontrack instead
   pc.onaddstream = function(evt) {
 
 */
-  pc.ontrack = function(evt) {			//MK update this could be big
+  pc.onaddstream = function(evt) {			//MK update this could be big
     util.log('Received remote stream');
     var stream = evt.stream;
     var connection = provider.getConnection(peerId, connectionId);
@@ -1428,7 +1428,7 @@ module.exports = Socket;
 	var defaultConfig = {'iceServers': [{ 'url': 'stun:stun.l.google.com:19302' }]};
 	*/
 	
-	var defaultConfig = {'iceServers': [{ 'urls': 'stun:stun.l.google.com:19302' }]};	//MK updated
+	var defaultConfig = {'iceServers': [{ 'url': 'stun:stun.l.google.com:19302' }]};	//MK updated
 var dataCount = 1;
 
 var BinaryPack = require('js-binarypack');
