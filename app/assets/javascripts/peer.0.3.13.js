@@ -578,7 +578,7 @@ Mozilla complains onaddstream is depricated use ontrack instead
   pc.onaddstream = function(evt) {
 
 */
-  pc.onaddstream = function(evt) {			//MK update this could be big
+  pc.ontrack = function(evt) {			//MK update this is used for video
     util.log('Received remote stream');
     var stream = evt.stream;
     var connection = provider.getConnection(peerId, connectionId);
@@ -1426,9 +1426,10 @@ module.exports = Socket;
 	/*
 	Mozilla complains this is depricated use 'urls' instead
 	var defaultConfig = {'iceServers': [{ 'url': 'stun:stun.l.google.com:19302' }]};
+	not updated as Xirsys uses url
 	*/
 	
-	var defaultConfig = {'iceServers': [{ 'url': 'stun:stun.l.google.com:19302' }]};	//MK updated
+	var defaultConfig = {'iceServers': [{ 'url': 'stun:stun.l.google.com:19302' }]};
 var dataCount = 1;
 
 var BinaryPack = require('js-binarypack');

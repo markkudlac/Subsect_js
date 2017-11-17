@@ -206,20 +206,22 @@ Subcon.prototype.peerServerOn = function(subname, loadpath) {
 	            "Authorization": "Basic " + btoa("markkudlac:10633c0a-fb06-4502-a834-de7d1990c3e6")
 	           },
 	  
-	  success: function (data, dstatus) {
-	
-		  console.log("XirSys ajax status : " + dstatus);
-		/*
-		//V2
-		self.peerClientOn(subname, "", data.d);
-		*/
-		
-		//V3
+	  //V3
+	  success: function (data) {
 		self.peerClientOn(subname, "", data.v);
-		console.log("ICE List: "+JSON.stringify(data.v));
+		//console.log("ICE List: "+JSON.stringify(data.v));
 	  },
-	  error: function() {
-	    console.log("ERROR  XirSys");
+	  
+/*
+	//V2
+	  success: function (data, dstatus) {
+		console.log("XirSys ajax status : " + dstatus);
+		self.peerClientOn(subname, "", data.d);
+	  },
+ */ 
+	  
+	  error: function(errmess) {		//errmess is only in V3 but not a problem for V2
+	    console.log("ERROR XirSys : " + errmess.v);
 		self.peerClientOn(subname, "", null);	//use Google default
 	  }
 	});
