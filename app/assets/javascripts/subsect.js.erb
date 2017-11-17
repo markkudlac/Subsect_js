@@ -182,6 +182,7 @@ Subcon.prototype.peerServerOn = function(subname, loadpath) {
 	}
 	
 	$.ajax({
+		/*
 		// V2
 	  type: "POST",
 	  url: "https://global.xirsys.net/ice",
@@ -195,19 +196,27 @@ Subcon.prototype.peerServerOn = function(subname, loadpath) {
 	    secure: 1,
 		timeout: 600
 	  },
-	  
+	  */
 	
-	/*  
+	
 	  // V3
 	  url: "https://us.xirsys.com/_turn/subsect.net/default/default",
 	  type: "PUT",
 	  headers: {
 	            "Authorization": "Basic " + btoa("markkudlac:10633c0a-fb06-4502-a834-de7d1990c3e6")
 	           },
-	  */
+	  
 	  success: function (data, dstatus) {
+	
 		  console.log("XirSys ajax status : " + dstatus);
+		/*
+		//V2
 		self.peerClientOn(subname, "", data.d);
+		*/
+		
+		//V3
+		self.peerClientOn(subname, "", data.v);
+		console.log("ICE List: "+JSON.stringify(data.v));
 	  },
 	  error: function() {
 	    console.log("ERROR  XirSys");
