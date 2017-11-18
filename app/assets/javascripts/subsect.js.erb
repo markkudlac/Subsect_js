@@ -208,7 +208,13 @@ Subcon.prototype.peerServerOn = function(subname, loadpath) {
 	  
 	  //V3
 	  success: function (data) {
+		
+	   if (data.s == "ok"){
+	   	console.log("Xirsys ok")
 		self.peerClientOn(subname, "", data.v);
+	   } else {
+	   	console.log("Xirsys error : " + data.v)
+	   }
 		//console.log("ICE List: "+JSON.stringify(data.v));
 	  },
 	  
@@ -220,8 +226,8 @@ Subcon.prototype.peerServerOn = function(subname, loadpath) {
 	  },
  */ 
 	  
-	  error: function(errmess) {		//errmess is only in V3 but not a problem for V2
-	    console.log("ERROR XirSys : " + errmess.v);
+	  error: function() {
+	    console.log("Xirsys AJAX error");
 		self.peerClientOn(subname, "", null);	//use Google default
 	  }
 	});
