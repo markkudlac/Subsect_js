@@ -132,7 +132,9 @@ var SUB_GLB = {
 	callkey: null,
 	useRTC: true,
 	subdomain: "",
-	passtag: "passwd"
+	passtag: "passwd",
+	cycletime: 12500,
+	timer: null
 };
 
 
@@ -237,9 +239,19 @@ Subcon.prototype.peerServerOn = function(subname, loadpath) {
 
 Subcon.prototype.peerClientOn = function(subname, peerid, customConfig){
 	
+	/* For Peerjs hosting
 	var opts = {key: 'wcf528rijzx8byb9',
 				debug: 3
 				};
+				*/
+				
+				
+	var opts = {
+				host: 'subpeersrv.herokuapp.com',
+				// host: '192.168.1.5',
+				port: 80,
+				debug: 3
+				};				
 						
 	if (customConfig != null) opts.config = customConfig;
 		
@@ -247,6 +259,14 @@ Subcon.prototype.peerClientOn = function(subname, peerid, customConfig){
 	this.peer = new Peer(opts);
 	
 		this.peer.on('open', function(id) {
+			
+			if (SUB_GLB.timer == null) {
+			        SUB_GLB.timer = setInterval(function(){
+			        // console.log("sent PING");
+					
+					// This may have to be looked at for multiple connections
+					self.peer.socket.send({type: "PING", payload: {}});}, SUB_GLB.cycletime);
+			}
 			
 			if (peerid.length <= 0) {
 
@@ -288,7 +308,11 @@ Subcon.prototype.peerClientOn = function(subname, peerid, customConfig){
 		});
 			
 	  this.peer.on('disconnect', function() {
-		alert('Peer client Disconnect event ');
+		  if (SUB_GLB.timer != null) {
+		          clearTimeout(SUB_GLB.timer);
+		          SUB_GLB.timer = null;
+		  }
+		  alert('Peer client Disconnect event ');
 		});
 }
 
