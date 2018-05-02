@@ -16,10 +16,12 @@
   
 	<% if current_page?(controller: 'webrtc', action: "client") then %>
 		<%= javascript_include_tag 'subsect', 'data-turbolinks-track' => true %>
-		
-		<%= javascript_include_tag 'adapter_no_edge', 'data-turbolinks-track' => true %>
-		<%= javascript_include_tag 'peer16na', 'data-turbolinks-track' => true %>
-			
+	<!--	
+		< javascript_include_tag 'adapter_no_edge', 'data-turbolinks-track' => true >
+		< javascript_include_tag 'peer16na', 'data-turbolinks-track' => true >
+	-->
+		<%= javascript_include_tag 'peer.0.3.13', 'data-turbolinks-track' => true %>
+				
 	<% else %>
 		<% if current_page?(controller: 'static', action: "home") then %>
 			<%= javascript_include_tag 'peer.0.3.13', 'data-turbolinks-track' => true %>

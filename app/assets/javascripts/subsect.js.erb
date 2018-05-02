@@ -319,8 +319,10 @@ Subcon.prototype.peerClientOn = function(subname, peerid, customConfig){
 
 Subcon.prototype.makeConnection = function(peerid){
 	
-//	this.conn = this.peer.connect(peerid, {reliable: true});  for  peerjs13
-	this.conn = this.peer.connect(peerid, {serialization: "json"});
+	this.conn = this.peer.connect(peerid, {reliable: true});  
+	console.log("for  peerjs13");
+	
+//	this.conn = this.peer.connect(peerid, {serialization: "json"});
 	this.conn.on('disconected', function(){
 		
 		alert("Peer.connect DISCONNECTED");

@@ -12,5 +12,6 @@ Rails.application.config.assets.version = '1.0'
 
 #This was added by Mark to handle addition of conditional css/js
 Rails.application.config.assets.precompile += %w( subsect.js )
-Rails.application.config.assets.precompile += %w( peer16na.js )
-Rails.application.config.assets.precompile += %w( adapter_no_edge.js )
+Rails.application.config.assets.precompile += %w( peer.0.3.13.js )
+#Rails.application.config.assets.precompile += %w( peer16na.js )
+#Rails.application.config.assets.precompile += %w( adapter_no_edge.js )
