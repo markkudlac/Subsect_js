@@ -192,7 +192,8 @@ DataConnection.prototype.send = function(data, chunked) {
     // DataChannel currently only supports strings.
     if (!util.supports.sctp) {
       util.blobToBinaryString(blob, function(str) {
-        self._bufferedSend(str);
+		  //  This is a nasty hack by Mark needs to be looked at
+        self._bufferedSend(str+"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
       });
     } else if (!util.supports.binaryBlob) {
       // We only do this if we really need to (e.g. blobs are not supported),
