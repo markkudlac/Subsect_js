@@ -18,7 +18,8 @@ Rails.application.configure do
 
     config.cache_store = :memory_store
     config.public_file_server.headers = {
-      'Cache-Control' => 'public, max-age=172800'
+#was 5.0      'Cache-Control' => 'public, max-age=172800'
+      'Cache-Control' => "public, max-age=#{2.days.seconds.to_i}"
     }
   else
     config.action_controller.perform_caching = false
@@ -50,10 +51,10 @@ Rails.application.configure do
 
   # Use an evented file watcher to asynchronously detect changes in source code,
   # routes, locales, etc. This feature depends on the listen gem.
-  # config.file_watcher = ActiveSupport::EventedFileUpdateChecker
+  config.file_watcher = ActiveSupport::EventedFileUpdateChecker
   
   #Set for Devise. Set localhost to domain for production
-  config.action_mailer.default_url_options = { :host => '192.168.1.103:3000' }
+  config.action_mailer.default_url_options = { :host => 'dev.subsect.net:3000' }
   
   # This will open email in browser
   config.action_mailer.delivery_method = :letter_opener

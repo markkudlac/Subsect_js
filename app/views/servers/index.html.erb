@@ -33,3 +33,11 @@
 <br>
 
 <%= link_to 'New Server', new_server_path %>
+
+<p>
+<br>
+	<% if user_signed_in? %>
+	  <%= link_to('Logout', destroy_user_session_path, method: :delete) %>        
+
+	<% end %>
+</p>
