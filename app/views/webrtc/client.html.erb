@@ -6,9 +6,7 @@
 <script>
 if (util.supports.data) { 
 	
-<%= render( :template => "layouts/client", :formats => [:js], 
-	:locals => {:appPath => @appPath, :appName => @appName, :appSubId => @appSubId})
-	%>
+	initall( '<%= @appPath %>',  '<%= @appSubId %>');
 	
 } else {
 	$("#loadspin").hide();

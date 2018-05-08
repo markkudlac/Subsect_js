@@ -139,6 +139,7 @@ var SUB_GLB = {
 
 
 function initall(apath, subname){
+	
 	SUB_GLB.subdomain = subname+"_init";
 	Subcon.subrtc.default = new Subcon(apath);
 	Subcon.subrtc.default.peerServerOn(subname);
@@ -296,7 +297,6 @@ Subcon.prototype.peerClientOn = function(subname, peerid, customConfig){
 Subcon.prototype.makeConnection = function(peerid){
 	
 	this.conn = this.peer.connect(peerid);
-	console.log("for  peerjs16");
 	
 	this.conn.on('disconected', function(){
 		
@@ -329,7 +329,7 @@ Subcon.prototype.callServer = function() {
 	var self = this;
 	
 	if (self.subName == SUB_GLB.subdomain){		// This maynot be right
-  	  console.log("Call for app LOCAL : "+ self.loadPath);
+//  	  console.log("Call for app LOCAL : "+ self.loadPath);
   		self.conn.send(xhrCall(self.loadPath));
 		return
 	} else if (self.subName + "_init" == SUB_GLB.subdomain){
@@ -341,8 +341,8 @@ Subcon.prototype.callServer = function() {
 	  self.conn.on('data', function(data) {
 			
 			var xblob;
-console.log("conn.on get blobs cnt : " + data.cnt + "  data.rcvkey : " + data.rcvkey + "  data.uri : " + data.uri)
-console.log("status os file return : " + data.status);
+//console.log("conn.on get blobs cnt : " + data.cnt + "  data.rcvkey : " + data.rcvkey + "  data.uri : " + data.uri)
+//console.log("status os file return : " + data.status);
 
 			if (data.status && parseInt(data.status) != 200) {
 				//This is a bad hack that needs to be looked at later. Error handling is BAD!!!!

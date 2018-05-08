@@ -6,8 +6,8 @@ class WebrtcController < ApplicationController
     @appName = app_params(params)[:pkgname]
     
     @appSubId = request.subdomain
-    puts "PeerId : #{@appSubId}"
-    puts "pkgname : #{@appName}"
+#    puts "PeerId : #{@appSubId}"
+#    puts "pkgname : #{@appName}"
     
     if (@appName == nil || @appName.length == 0 ) then
       redirect_to "/pkg/Menu"
