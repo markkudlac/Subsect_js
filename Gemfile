@@ -1,6 +1,5 @@
 source 'https://rubygems.org'
 
-
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '~> 5.1.4'
 
@@ -21,6 +20,7 @@ gem 'jbuilder', '>= 2.7.0'
 gem 'sdoc', '>= 1.0.0', group: :doc
 
 #handle null origin for ios
+#cors.rb was not created
 gem 'rack-cors'
 
 # Use ActiveModel has_secure_password
