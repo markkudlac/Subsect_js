@@ -1,6 +1,6 @@
 class AppzipsController < ApplicationController
   before_action :set_appzip, only: [:show, :edit, :update, :destroy, :serve]
-  before_action :authenticate_user!, except: [:serve, :bazaar]
+  before_action :authenticate_user!, except: [:serve, :bazaar, :listapps]
   
   # GET /appzips
   # GET /appzips.json
@@ -85,6 +85,16 @@ class AppzipsController < ApplicationController
 #    send_data(@appzip[:zipfile], :type => "text/html", :filename => "rootpack.html")
     render json: @appzip
   end
+
+ 
+  def listapps
+    #export all fields except zipfile
+    
+    columns = Appzip.attribute_names - ["zipfile"]
+    render json: Appzip.select(columns)
+  
+  end
+  
   
   def bazaar
     @appzips = Appzip.all

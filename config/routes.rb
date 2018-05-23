@@ -25,6 +25,7 @@ Rails.application.routes.draw do
   get "/api/offline/:subname/:passwd", to: "api#offline"
   get "/api/control/:subname/:passwd", to: "api#control"
   get "/api/serve/:id", to: "appzips#serve"
+  get "/api/listapps", to: "appzips#listapps"
   
   get "/", to: 'webrtc#client', constraints: 
       lambda { |r| r.subdomain.present? && r.subdomain != 'www' }
